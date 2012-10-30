@@ -8,19 +8,23 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.stage.DirectoryChooser;
+
+import javax.inject.Inject;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.Status;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import com.cathive.fx.guice.FXMLController;
+
+import de.br0tbox.gitfx.core.model.GitFxProject;
+import de.br0tbox.gitfx.core.services.IPropertyService;
+import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 
 /**
  * The controller for the projects view.
@@ -30,12 +34,20 @@ import com.cathive.fx.guice.FXMLController;
 @FXMLController(controllerId = "/ProjectView.fxml")
 public class ProjectController extends AbstractController {
 
+	private static final String LASTOPEN_PROPERTY = "projectcontroller.lastopened";
+
 	private static final Logger LOGGER = LogManager.getLogger(ProjectController.class);
+
+	@Inject
+	private IPropertyService propertyService;
 
 	@FXML
 	private Button openButton;
 
 	private File lastOpened = null;
+
+	@FXML
+	private ListView projectList;
 
 	public ProjectController() {
 		System.out.println("Constructed");
@@ -44,6 +56,19 @@ public class ProjectController extends AbstractController {
 	@Override
 	public void onInit() {
 		System.out.println("init");
+		final String lastOpenProperty = propertyService.getStringProperty(LASTOPEN_PROPERTY);
+		if (lastOpenProperty != null) {
+			lastOpened = new File(lastOpenProperty);
+		}
+
+		projectList.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
+
+			@Override
+			public void handle(ContextMenuEvent event) {
+				final ProjectModel model = (ProjectModel) projectList.getItems().get(0);
+				model.setChanges(10);
+			}
+		});
 		openButton.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
@@ -55,22 +80,30 @@ public class ProjectController extends AbstractController {
 				File file = chooser.showDialog(getStage());
 				if (file != null) {
 					lastOpened = file;
+					propertyService.saveProperty(LASTOPEN_PROPERTY, file.getAbsolutePath());
 					System.out.println(file.getAbsolutePath());
 					if (!file.getAbsolutePath().endsWith(".git")) {
 						file = new File(file, ".git");
 					}
 					final FileRepositoryBuilder builder = new FileRepositoryBuilder();
+					Repository repository;
 					try {
-						final Repository repository = builder.setGitDir(file).readEnvironment().findGitDir().build();
+						repository = builder.setGitDir(file).readEnvironment().findGitDir().build();
 						final Git git = new Git(repository);
-						final Status status = git.status().call();
-						final Set<String> untracked = status.getUntracked();
-						System.out.println(untracked);
-						final ObjectId resolve = repository.resolve("HEAD");
-						System.out.println(resolve.getName());
-					} catch (final IOException | NoWorkTreeException | GitAPIException e) {
-						LOGGER.error(e.getMessage(), e);
+						final GitFxProject gitFxProject = new GitFxProject(git);
+						final Set<String> allUncommitedChanges = gitFxProject.getAllUncommitedChanges();
+						for (final String uncommitedChange : allUncommitedChanges) {
+							System.out.println(uncommitedChange);
+						}
+						final ProjectModel projectModel = new ProjectModel();
+						projectModel.setProjectName(new File(file.getParent()).getName());
+						projectModel.setCurrentBranch(gitFxProject.getGit().getRepository().getBranch());
+						projectModel.setChanges(gitFxProject.getUncommitedChangesNumber());
+						projectList.getItems().add(projectModel);
+					} catch (final IOException e) {
+						LOGGER.error(e);
 					}
+
 				}
 			}
 		});
