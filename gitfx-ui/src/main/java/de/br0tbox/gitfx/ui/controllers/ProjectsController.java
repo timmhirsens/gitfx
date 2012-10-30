@@ -10,6 +10,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 
 import javax.inject.Inject;
@@ -32,11 +34,11 @@ import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
  *
  */
 @FXMLController(controllerId = "/ProjectView.fxml")
-public class ProjectController extends AbstractController {
+public class ProjectsController extends AbstractController {
 
 	private static final String LASTOPEN_PROPERTY = "projectcontroller.lastopened";
 
-	private static final Logger LOGGER = LogManager.getLogger(ProjectController.class);
+	private static final Logger LOGGER = LogManager.getLogger(ProjectsController.class);
 
 	@Inject
 	private IPropertyService propertyService;
@@ -49,9 +51,8 @@ public class ProjectController extends AbstractController {
 	@FXML
 	private ListView projectList;
 
-	public ProjectController() {
-		System.out.println("Constructed");
-	}
+	@FXML
+	Button cloneButton;
 
 	@Override
 	public void onInit() {
@@ -67,6 +68,17 @@ public class ProjectController extends AbstractController {
 			public void handle(ContextMenuEvent event) {
 				final ProjectModel model = (ProjectModel) projectList.getItems().get(0);
 				model.setChanges(10);
+			}
+		});
+		projectList.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent mouseEvent) {
+				if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
+					if (mouseEvent.getClickCount() == 2) {
+						//TODO: Open the Project in Question
+					}
+				}
 			}
 		});
 		openButton.setOnAction(new EventHandler<ActionEvent>() {
