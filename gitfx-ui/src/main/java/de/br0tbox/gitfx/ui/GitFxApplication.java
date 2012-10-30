@@ -19,13 +19,14 @@ import com.cathive.fx.guice.GuiceFXMLLoader;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
 import com.google.inject.Module;
 
+import de.br0tbox.gitfx.ui.controllers.AbstractController;
 import de.br0tbox.gitfx.ui.modules.MainModule;
 import de.br0tbox.gitfx.ui.shutdown.IShutdownHook;
 
 public class GitFxApplication extends GuiceApplication {
 
 	private static final Logger LOGGER = LogManager.getLogger(GitFxApplication.class);
-	
+
 	@Inject
 	GuiceFXMLLoader fxmlLoader;
 	@Inject
@@ -51,6 +52,7 @@ public class GitFxApplication extends GuiceApplication {
 		LOGGER.debug("Starting Application");
 		final Result result = fxmlLoader.load(this.getClass().getResource("/ProjectView.fxml"));
 		final Parent root = result.getRoot();
+		result.<AbstractController> getController().init(primaryStage);
 		final Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
 		primaryStage.show();
