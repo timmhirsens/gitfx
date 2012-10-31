@@ -3,6 +3,8 @@ package de.br0tbox.gitfx.ui.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -19,6 +21,9 @@ import javax.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.events.IndexChangedEvent;
+import org.eclipse.jgit.events.IndexChangedListener;
+import org.eclipse.jgit.events.ListenerHandle;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -76,7 +81,7 @@ public class ProjectsController extends AbstractController {
 			public void handle(MouseEvent mouseEvent) {
 				if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
 					if (mouseEvent.getClickCount() == 2) {
-						//TODO: Open the Project in Question
+						// TODO: Open the Project in Question
 					}
 				}
 			}
@@ -107,6 +112,15 @@ public class ProjectsController extends AbstractController {
 						for (final String uncommitedChange : allUncommitedChanges) {
 							System.out.println(uncommitedChange);
 						}
+						final ListenerHandle addIndexChangedListener = repository.getListenerList().addIndexChangedListener(new IndexChangedListener() {
+
+							@Override
+							public void onIndexChanged(IndexChangedEvent event) {
+								System.out.println("Bla");
+								System.out.println(event);
+							}
+						});
+						startTimer(repository);
 						final ProjectModel projectModel = new ProjectModel();
 						projectModel.setProjectName(new File(file.getParent()).getName());
 						projectModel.setCurrentBranch(gitFxProject.getGit().getRepository().getBranch());
@@ -118,7 +132,29 @@ public class ProjectsController extends AbstractController {
 
 				}
 			}
+
 		});
 	}
 
+	private void startTimer(final Repository repository) {
+		final TimerTask task = new TimerTask() {
+
+			@Override
+			public void run() {
+//				try {
+//					final DirCache cache = DirCache.read(repository);
+//					final DirCacheBuilder builder = cache.builder();
+//					for (int i = 0; i < cache.getEntryCount(); i++) {
+//						final DirCacheEntry entry = cache.getEntry(i);
+//						System.out.println(entry.getPathString() + " " + entry.getStage());
+//					}
+//					cache.unlock();
+//				} catch (final IOException e) {
+//					e.printStackTrace();
+//				}
+			}
+		};
+		final Timer timer = new Timer(true);
+		timer.scheduleAtFixedRate(task, 0, 4000);
+	}
 }

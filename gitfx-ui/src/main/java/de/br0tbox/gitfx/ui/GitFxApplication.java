@@ -45,6 +45,7 @@ public class GitFxApplication extends GuiceApplication {
 		final MainModule mainModule = new MainModule();
 		modules.add(mainModule);
 		return modules;
+
 	}
 
 	@Override
