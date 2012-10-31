@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="136.0" prefWidth="414.0" xmlns:fx="http://javafx.com/fxml" fx:controller="de.br0tbox.gitfx.ui.controllers.LoadingDialogController">
+  <children>
+    <BorderPane prefHeight="136.0" prefWidth="414.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <bottom>
+        <GridPane>
+          <children>
+            <AnchorPane id="AnchorPane" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.valignment="TOP">
+              <children>
+                <Button fx:id="cancelButton" layoutY="5.0" mnemonicParsing="false" prefWidth="135.0" text="Cancel" />
+              </children>
+            </AnchorPane>
+          </children>
+          <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          </columnConstraints>
+          <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          </rowConstraints>
+        </GridPane>
+      </bottom>
+      <center>
+        <ProgressBar fx:id="progressBar" prefHeight="26.0" prefWidth="283.0" progress="0.0" />
+      </center>
+      <top>
+        <Label id="tasktitel" fx:id="tasktitle" text="Label" BorderPane.alignment="TOP_CENTER" />
+      </top>
+    </BorderPane>
+  </children>
+</AnchorPane>

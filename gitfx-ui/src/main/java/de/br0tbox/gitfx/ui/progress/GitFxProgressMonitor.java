@@ -11,14 +11,18 @@ import org.eclipse.jgit.lib.ProgressMonitor;
 public class GitFxProgressMonitor implements ProgressMonitor {
 
 	private ProgressIndicator progressIndicator;
-	private SimpleDoubleProperty progressProperty;
+	private SimpleDoubleProperty progressProperty = new SimpleDoubleProperty();
 	private StringProperty titleProperty;
 	private int currentTaskTotalWork;
-	private int currentTaskDone;
 
-	public GitFxProgressMonitor(ProgressIndicator progressIndicator, StringProperty title) {
-		this.progressIndicator = progressIndicator;
-		this.titleProperty = title;
+	public void setTitleProperty(StringProperty titleProperty) {
+		this.titleProperty = titleProperty;
+	}
+
+	private int currentTaskDone;
+	private String currentTaskTitle;
+
+	public GitFxProgressMonitor() {
 		init();
 	}
 
@@ -27,7 +31,7 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				//FIXME: wieso geht hier nicht Double als Typ?
+				// FIXME: wieso geht hier nicht Double als Typ?
 				progressIndicator.setProgress((Double) newValue);
 			}
 		});
@@ -40,15 +44,18 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 
 	@Override
 	public void beginTask(String title, int totalWork) {
-		titleProperty.setValue(title);
+		this.currentTaskTitle = title;
+		titleProperty.setValue(currentTaskTitle + " (0 of " + totalWork+")");
 		progressProperty.set(0.0);
 		currentTaskTotalWork = totalWork;
+		currentTaskDone = 0;
 	}
 
 	@Override
 	public void update(int completed) {
 		currentTaskDone += completed;
-		final double progess = (double) currentTaskDone / (double) currentTaskTotalWork * 100.0;
+		final double progess = (double) currentTaskDone / (double) currentTaskTotalWork;
+		titleProperty.setValue(currentTaskTitle + " (" + currentTaskDone + " of " + currentTaskTotalWork+")");
 		progressProperty.set(progess);
 	}
 
@@ -62,6 +69,10 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 	@Override
 	public boolean isCancelled() {
 		return false;
+	}
+
+	public void setProgressIndicator(ProgressIndicator progressIndicator) {
+		this.progressIndicator = progressIndicator;
 	}
 
 }

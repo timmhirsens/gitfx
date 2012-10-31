@@ -20,17 +20,22 @@ import javax.inject.Inject;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.events.IndexChangedEvent;
 import org.eclipse.jgit.events.IndexChangedListener;
 import org.eclipse.jgit.events.ListenerHandle;
+import org.eclipse.jgit.lib.IndexDiff;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.treewalk.FileTreeIterator;
 
 import com.cathive.fx.guice.FXMLController;
 
 import de.br0tbox.gitfx.core.model.GitFxProject;
 import de.br0tbox.gitfx.core.services.IPropertyService;
+import de.br0tbox.gitfx.ui.progress.GitFxProgressMonitor;
+import de.br0tbox.gitfx.ui.progress.GitFxTask;
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 
 /**
@@ -81,7 +86,15 @@ public class ProjectsController extends AbstractController {
 			public void handle(MouseEvent mouseEvent) {
 				if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
 					if (mouseEvent.getClickCount() == 2) {
-						// TODO: Open the Project in Question
+						final File gitDir = new File(System.getProperty("user.home") + File.separatorChar + "gittest");
+						gitDir.delete();
+						gitDir.mkdirs();
+						final CloneCommand cloneRepository = Git.cloneRepository();
+						cloneRepository.setDirectory(gitDir).setURI("https://github.com/VanillaDev/Vanilla.git");
+						final GitFxProgressMonitor fxProgressMonitor = new GitFxProgressMonitor();
+						cloneRepository.setProgressMonitor(fxProgressMonitor);
+						final GitFxTask fxTask = new GitFxTask(cloneRepository, fxProgressMonitor);
+						runGitTaskWithProgressDialog(fxTask);
 					}
 				}
 			}
@@ -141,17 +154,27 @@ public class ProjectsController extends AbstractController {
 
 			@Override
 			public void run() {
-//				try {
-//					final DirCache cache = DirCache.read(repository);
-//					final DirCacheBuilder builder = cache.builder();
-//					for (int i = 0; i < cache.getEntryCount(); i++) {
-//						final DirCacheEntry entry = cache.getEntry(i);
-//						System.out.println(entry.getPathString() + " " + entry.getStage());
-//					}
-//					cache.unlock();
-//				} catch (final IOException e) {
-//					e.printStackTrace();
-//				}
+				// try {
+				// final DirCache cache = DirCache.read(repository);
+				// final DirCacheBuilder builder = cache.builder();
+				// for (int i = 0; i < cache.getEntryCount(); i++) {
+				// final DirCacheEntry entry = cache.getEntry(i);
+				// System.out.println(entry.getPathString() + " " +
+				// entry.getStage());
+				// }
+				// cache.unlock();
+				// } catch (final IOException e) {
+				// e.printStackTrace();
+				// }
+				try {
+					final IndexDiff diff = new IndexDiff(repository, repository.getRef("HEAD").getObjectId(), new FileTreeIterator(repository));
+					diff.diff();
+					System.out.println(diff.getUntracked());
+					repository.scanForRepoChanges();
+				} catch (final IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		};
 		final Timer timer = new Timer(true);
