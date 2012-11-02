@@ -6,17 +6,35 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.image.Image;
 
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import com.cathive.fx.guice.FXMLController;
 
@@ -37,14 +55,73 @@ public class SingleProjectController extends AbstractController {
 	private TreeItem tagsItem;
 	@FXML
 	private TreeItem remotesItem;
+	@FXML
+	private Button commitButton;
+	private ToggleGroup toggleGroup = new ToggleGroup();
+	@FXML
+	private ToggleButton recentButton;
+	@FXML
+	private ToggleButton listButton;
+	@FXML
+	ListView commitList;
 
 	@Override
 	protected void onInit() {
+		recentButton.setToggleGroup(toggleGroup);
+		listButton.setToggleGroup(toggleGroup);
 		modelToView();
+		tableView.setOnMouseClicked(new EventHandler<Event>() {
+
+			@Override
+			public void handle(Event arg0) {
+				final GitFxCommit selectedItem = tableView.getSelectionModel().getSelectedItem();
+				if (selectedItem == null) {
+					return;
+				}
+				final Git git = projectModel.getFxProject().getGit();
+				final Repository repository = git.getRepository();
+				ObjectId resolve;
+				try {
+					resolve = repository.resolve(selectedItem.getHash());
+					final RevWalk revWalk = new RevWalk(repository);
+					final RevCommit commit = revWalk.parseCommit(resolve);
+					RevCommit parent = null;
+					if (commit.getParents().length > 0 && commit.getParent(0) != null) {
+						parent = revWalk.parseCommit(commit.getParent(0).getId());
+					}
+
+					final DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+					df.setRepository(repository);
+					df.setDiffComparator(RawTextComparator.DEFAULT);
+					df.setDetectRenames(true);
+					List<DiffEntry> diffs = null;
+					if (parent != null) {
+						diffs = df.scan(parent.getTree(), commit.getTree());
+					} else {
+						diffs = df.scan(new EmptyTreeIterator(), new CanonicalTreeParser(null, revWalk.getObjectReader(), commit.getTree()));
+					}
+					final ObservableList items = commitList.getItems();
+					items.clear();
+					for (final DiffEntry diff : diffs) {
+						if (ChangeType.DELETE.equals(diff.getChangeType())) {
+							items.add(diff.getChangeType().toString().subSequence(0, 1) + " " + diff.getOldPath());
+						} else {
+							items.add(diff.getChangeType().toString().subSequence(0, 1) + " " + diff.getNewPath());
+						}
+					}
+					revWalk.release();
+					df.release();
+				} catch (final IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	private void modelToView() {
-		getStage().setTitle(projectModel.getProjectName());
+		getStage().setTitle(projectModel.getProjectName() + " (" + projectModel.getCurrentBranch() + ") - GitFx");
+		getStage().getIcons().add(new Image(SingleProjectController.class.getResourceAsStream("/icons/package.png")));
 		final LogCommand log = projectModel.getFxProject().getGit().log();
 		// Commits
 		tableView.setItems(projectModel.getCommits());

@@ -1,5 +1,6 @@
 package de.br0tbox.gitfx.ui;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -36,6 +37,12 @@ public class GitFxApplication extends GuiceApplication {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				LOGGER.error("Unhandled Exception: " + e.getMessage() + "", e);
+			}
+		});
 		launch(args);
 	}
 

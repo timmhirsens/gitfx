@@ -3,6 +3,7 @@
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
@@ -10,18 +11,59 @@
   <children>
     <BorderPane prefHeight="400.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <bottom>
-        <HBox prefHeight="27.0" prefWidth="300.0">
+        <VBox minHeight="27.0" prefHeight="27.0" prefWidth="300.0">
           <children>
-            <Button fx:id="openButton" mnemonicParsing="false" prefWidth="150.0" text="Open" />
-            <Button fx:id="cloneButton" mnemonicParsing="false" prefWidth="150.0" text="Clone Repository" />
+            <VBox id="VBox" alignment="CENTER" spacing="5.0">
+              <children>
+                <ToolBar>
+                  <items>
+                    <Label />
+                  </items>
+                </ToolBar>
+              </children>
+            </VBox>
           </children>
-        </HBox>
+        </VBox>
       </bottom>
       <center>
-        <ListView fx:id="projectList" prefHeight="358.0" prefWidth="300.0" />
+        <ListView fx:id="projectList" prefHeight="346.0000999999975" prefWidth="300.0" />
       </center>
       <top>
-        <Label text="Projects" />
+        <VBox minHeight="27.0" prefHeight="27.0" prefWidth="300.0">
+          <children>
+            <ToolBar>
+              <items>
+                <Button fx:id="addButton" mnemonicParsing="false">
+                  <graphic>
+                    <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+                      <image>
+                        <Image url="@icons/add.png" preserveRatio="false" smooth="false" />
+                      </image>
+                    </ImageView>
+                  </graphic>
+                </Button>
+                <Button fx:id="deleteButton" mnemonicParsing="false">
+                  <graphic>
+                    <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+                      <image>
+                        <Image url="@icons/delete.png" preserveRatio="false" smooth="false" />
+                      </image>
+                    </ImageView>
+                  </graphic>
+                </Button>
+                <Button fx:id="cloneButton" mnemonicParsing="false">
+                  <graphic>
+                    <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+                      <image>
+                        <Image url="@icons/page_copy.png" preserveRatio="false" smooth="false" />
+                      </image>
+                    </ImageView>
+                  </graphic>
+                </Button>
+              </items>
+            </ToolBar>
+          </children>
+        </VBox>
       </top>
     </BorderPane>
   </children>

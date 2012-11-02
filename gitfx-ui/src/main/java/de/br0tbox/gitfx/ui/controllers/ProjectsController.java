@@ -53,16 +53,17 @@ public class ProjectsController extends AbstractController {
 	@Inject
 	private IPropertyService propertyService;
 
-	@FXML
-	private Button openButton;
-
 	private File lastOpened = null;
 
 	@FXML
 	private ListView<ProjectModel> projectList;
 
 	@FXML
-	Button cloneButton;
+	private Button cloneButton;
+	@FXML
+	private Button deleteButton;
+	@FXML
+	private Button addButton;
 
 	@Override
 	public void onInit() {
@@ -110,7 +111,7 @@ public class ProjectsController extends AbstractController {
 				}
 			}
 		});
-		openButton.setOnAction(new EventHandler<ActionEvent>() {
+		addButton.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
 			public void handle(ActionEvent arg0) {
@@ -181,7 +182,7 @@ public class ProjectsController extends AbstractController {
 					final IndexDiff diff = new IndexDiff(repository, repository.getRef("HEAD").getObjectId(), new FileTreeIterator(repository));
 					diff.diff();
 					final Set<String> untracked = diff.getUntracked();
-					if(untracked.size() > 0) {
+					if (untracked.size() > 0) {
 						System.out.println(untracked);
 					}
 					repository.scanForRepoChanges();
