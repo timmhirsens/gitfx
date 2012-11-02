@@ -14,7 +14,6 @@ public class GitFxProject {
 
 	public GitFxProject(Git git) {
 		this.git = git;
-		
 	}
 	
 	public Set<String> getAllUncommitedChanges() {

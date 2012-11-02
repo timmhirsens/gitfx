@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.br0tbox.gitfx.ui.uimodel.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.TreeItem?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="780.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml" fx:controller="de.br0tbox.gitfx.ui.controllers.SingleProjectController">
+  <children>
+    <BorderPane prefHeight="600.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <bottom>
+        <ToolBar BorderPane.alignment="CENTER">
+          <items>
+            <ProgressBar prefWidth="200.0" progress="0.0" />
+          </items>
+        </ToolBar>
+      </bottom>
+      <center>
+        <SplitPane dividerPositions="0.5014245014245015" focusTraversable="true" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+          <items>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <children>
+                <VBox prefHeight="349.0" prefWidth="1078.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <ToolBar>
+                      <items>
+                        <ToggleButton mnemonicParsing="false" text="Recent" />
+                        <ToggleButton mnemonicParsing="false" selected="true" text="List" />
+                      </items>
+                    </ToolBar>
+                    <TableView fx:id="tableView" prefHeight="349.0" prefWidth="1078.0">
+                      <columns>
+                        <TableColumn prefWidth="75.0" text="Commit">
+                          <cellValueFactory>
+                            <PropertyValueFactory property="hash" />
+                          </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="75.0" text="Author">
+                          <cellValueFactory>
+                            <PropertyValueFactory property="author" />
+                          </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="500.0" text="Commit Message">
+                          <cellValueFactory>
+                            <PropertyValueFactory property="message" />
+                          </cellValueFactory>
+                        </TableColumn>
+                      </columns>
+                    </TableView>
+                  </children>
+                </VBox>
+              </children>
+            </AnchorPane>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
+          </items>
+        </SplitPane>
+      </center>
+      <left>
+        <TreeView fx:id="treeView" prefHeight="200.0" prefWidth="200.0">
+          <TreeItem value="root">
+            <children>
+              <TreeItem value="BRANCHES" fx:id="branchesItem" />
+              <TreeItem value="TAGS" fx:id="tagsItem" />
+              <TreeItem value="REMOTES" fx:id="remotesItem" />
+            </children>
+          </TreeItem>
+        </TreeView>
+      </left>
+      <top>
+        <VBox minHeight="27.0" prefHeight="56.0" prefWidth="1024.0">
+          <children>
+            <MenuBar minHeight="20.0" prefHeight="25.0" prefWidth="1024.0">
+              <menus>
+                <Menu mnemonicParsing="false" text="File">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Close" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Delete" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="About" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <ToolBar>
+              <items>
+                <Button mnemonicParsing="false" text="Refresh">
+                  <graphic>
+                    <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+                      <image>
+                        <Image url="@icons/arrow_refresh_small.png" preserveRatio="false" smooth="false" />
+                      </image>
+                    </ImageView>
+                  </graphic>
+                </Button>
+              </items>
+            </ToolBar>
+          </children>
+        </VBox>
+      </top>
+    </BorderPane>
+  </children>
+</AnchorPane>

@@ -21,6 +21,7 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 
 	private int currentTaskDone;
 	private String currentTaskTitle;
+	private int tasksRemaining;
 
 	public GitFxProgressMonitor() {
 		init();
@@ -39,6 +40,7 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 
 	@Override
 	public void start(int totalTasks) {
+		this.tasksRemaining = totalTasks;
 
 	}
 
@@ -64,6 +66,7 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 		currentTaskDone = 0;
 		currentTaskTotalWork = 0;
 		progressProperty.set(1.0);
+		tasksRemaining--;
 	}
 
 	@Override

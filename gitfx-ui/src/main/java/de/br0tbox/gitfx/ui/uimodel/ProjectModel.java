@@ -2,12 +2,30 @@ package de.br0tbox.gitfx.ui.uimodel;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import de.br0tbox.gitfx.core.model.GitFxProject;
 
 public class ProjectModel {
 
 	private SimpleIntegerProperty changes = new SimpleIntegerProperty();
 	private SimpleStringProperty projectName = new SimpleStringProperty("");
 	private SimpleStringProperty currentBranch = new SimpleStringProperty("");
+	private ObservableList<GitFxCommit> commits = FXCollections.observableArrayList();
+	public ObservableList<GitFxCommit> getCommits() {
+		return commits;
+	}
+
+	private GitFxProject fxProject;
+
+	public GitFxProject getFxProject() {
+		return fxProject;
+	}
+
+	public ProjectModel(GitFxProject fxProject) {
+		this.fxProject = fxProject;
+
+	}
 
 	public int getChanges() {
 		return changes.get();
