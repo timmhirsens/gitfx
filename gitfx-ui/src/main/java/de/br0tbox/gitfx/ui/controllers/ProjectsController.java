@@ -2,11 +2,13 @@ package de.br0tbox.gitfx.ui.controllers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -35,6 +37,8 @@ import com.cathive.fx.guice.FXMLController;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
 
 import de.br0tbox.gitfx.core.model.GitFxProject;
+import de.br0tbox.gitfx.core.model.PersistentProject;
+import de.br0tbox.gitfx.core.services.IProjectPersistentService;
 import de.br0tbox.gitfx.core.services.IPropertyService;
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 
@@ -52,6 +56,8 @@ public class ProjectsController extends AbstractController {
 
 	@Inject
 	private IPropertyService propertyService;
+	@Inject
+	private IProjectPersistentService projectPersistentService;
 
 	private File lastOpened = null;
 
@@ -71,95 +77,67 @@ public class ProjectsController extends AbstractController {
 		if (lastOpenProperty != null) {
 			lastOpened = new File(lastOpenProperty);
 		}
-
+		loadProjects();
 		projectList.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
 			@Override
 			public void handle(MouseEvent mouseEvent) {
 				if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
 					if (mouseEvent.getClickCount() == 2) {
-						try {
-							final ProjectModel projectModel = projectList.getSelectionModel().getSelectedItem();
-							LOGGER.debug("Opening Project : {}", projectModel.getProjectName());
-							final Result projectView = fxmlLoader.load(ProjectsController.class.getResource("/SingleProjectView.fxml"));
-							final Parent projectViewRoot = projectView.getRoot();
-							final SingleProjectController controller = projectView.getController();
-							controller.setProject(projectModel);
-							final Stage stage = new Stage();
-							final Scene scene = new Scene(projectViewRoot);
-							stage.setScene(scene);
-							controller.init(stage);
-							stage.show();
-						} catch (final IOException e) {
-							e.printStackTrace();
-						}
-						// final File gitDir = new
-						// File(System.getProperty("user.home") +
-						// File.separatorChar + "gittest");
-						// gitDir.delete();
-						// gitDir.mkdirs();
-						// final CloneCommand cloneRepository =
-						// Git.cloneRepository();
-						// cloneRepository.setDirectory(gitDir).setURI("https://github.com/VanillaDev/Vanilla.git");
-						// final GitFxProgressMonitor fxProgressMonitor = new
-						// GitFxProgressMonitor();
-						// cloneRepository.setProgressMonitor(fxProgressMonitor);
-						// final GitFxTask fxTask = new
-						// GitFxTask(cloneRepository, fxProgressMonitor);
-						// runGitTaskWithProgressDialog(fxTask);
+						openSelectedProject();
 					}
 				}
+			}
+		});
+		cloneButton.setOnMouseClicked(new EventHandler<Event>() {
+
+			@Override
+			public void handle(Event arg0) {
+				// TODO: Clone Project
+				// final File gitDir = new
+				// File(System.getProperty("user.home") +
+				// File.separatorChar + "gittest");
+				// gitDir.delete();
+				// gitDir.mkdirs();
+				// final CloneCommand cloneRepository =
+				// Git.cloneRepository();
+				// cloneRepository.setDirectory(gitDir).setURI("https://github.com/VanillaDev/Vanilla.git");
+				// final GitFxProgressMonitor fxProgressMonitor = new
+				// GitFxProgressMonitor();
+				// cloneRepository.setProgressMonitor(fxProgressMonitor);
+				// final GitFxTask fxTask = new
+				// GitFxTask(cloneRepository, fxProgressMonitor);
+				// runGitTaskWithProgressDialog(fxTask);
 			}
 		});
 		addButton.setOnAction(new EventHandler<ActionEvent>() {
-
 			@Override
 			public void handle(ActionEvent arg0) {
-				final DirectoryChooser chooser = new DirectoryChooser();
-				if (lastOpened != null) {
-					chooser.setInitialDirectory(lastOpened);
-				}
-				File file = chooser.showDialog(getStage());
-				if (file != null) {
-					lastOpened = file;
-					propertyService.saveProperty(LASTOPEN_PROPERTY, file.getAbsolutePath());
-					if (!file.getAbsolutePath().endsWith(".git")) {
-						file = new File(file, ".git");
-					}
-					for (final ProjectModel model : projectList.getItems()) {
-						if (model.getPath().equals(file.getAbsolutePath())) {
-							return;
-						}
-					}
-					final FileRepositoryBuilder builder = new FileRepositoryBuilder();
-					Repository repository;
-					try {
-						repository = builder.setGitDir(file).readEnvironment().findGitDir().build();
-						final Git git = new Git(repository);
-						final GitFxProject gitFxProject = new GitFxProject(git);
-						final ListenerHandle addIndexChangedListener = repository.getListenerList().addIndexChangedListener(new IndexChangedListener() {
-
-							@Override
-							public void onIndexChanged(IndexChangedEvent event) {
-								System.out.println("Bla");
-								System.out.println(event);
-							}
-						});
-						final ProjectModel projectModel = new ProjectModel(gitFxProject);
-						projectModel.setProjectName(new File(file.getParent()).getName());
-						projectModel.setCurrentBranch(gitFxProject.getGit().getRepository().getBranch());
-						projectModel.setChanges(gitFxProject.getUncommitedChangesNumber());
-						projectModel.setPath(file.getAbsolutePath());
-						startTimer(repository);
-						projectList.getItems().add(projectModel);
-					} catch (final IOException e) {
-						LOGGER.error(e);
-					}
-
+				final File choosedProject = openExistingProjectFileChooser();
+				if (choosedProject != null) {
+					addProject(choosedProject, null, false);
 				}
 			}
-
 		});
+		
+		deleteButton.setOnAction(new EventHandler<ActionEvent>() {
+			
+			@Override
+			public void handle(ActionEvent arg0) {
+				final ProjectModel selectedItem = projectList.getSelectionModel().getSelectedItem();
+				projectList.getItems().remove(selectedItem);
+				projectPersistentService.delete(new PersistentProject(selectedItem.getPath(), selectedItem.getProjectName()));
+			}
+		});
+	}
+
+	private void loadProjects() {
+		final List<PersistentProject> loadedProjects = projectPersistentService.loadAll();
+		for (final PersistentProject project : loadedProjects) {
+			final String path = project.getPath();
+			final String name = project.getName();
+			addProject(new File(path), name, true);
+		}
 	}
 
 	private void startTimer(final Repository repository) {
@@ -167,18 +145,6 @@ public class ProjectsController extends AbstractController {
 
 			@Override
 			public void run() {
-				// try {
-				// final DirCache cache = DirCache.read(repository);
-				// final DirCacheBuilder builder = cache.builder();
-				// for (int i = 0; i < cache.getEntryCount(); i++) {
-				// final DirCacheEntry entry = cache.getEntry(i);
-				// System.out.println(entry.getPathString() + " " +
-				// entry.getStage());
-				// }
-				// cache.unlock();
-				// } catch (final IOException e) {
-				// e.printStackTrace();
-				// }
 				try {
 					final IndexDiff diff = new IndexDiff(repository, repository.getRef("HEAD").getObjectId(), new FileTreeIterator(repository));
 					diff.diff();
@@ -188,12 +154,93 @@ public class ProjectsController extends AbstractController {
 					}
 					repository.scanForRepoChanges();
 				} catch (final IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error(e);
 				}
 			}
 		};
 		final Timer timer = new Timer(true);
 		timer.scheduleAtFixedRate(task, 0, 4000);
+	}
+
+	private void openSelectedProject() {
+		try {
+			final ProjectModel projectModel = projectList.getSelectionModel().getSelectedItem();
+			LOGGER.debug("Opening Project : {}", projectModel.getProjectName());
+			final Result projectView = fxmlLoader.load(ProjectsController.class.getResource("/SingleProjectView.fxml"));
+			final Parent projectViewRoot = projectView.getRoot();
+			final SingleProjectController controller = projectView.getController();
+			controller.setProject(projectModel);
+			final Stage stage = new Stage();
+			final Scene scene = new Scene(projectViewRoot);
+			stage.setScene(scene);
+			controller.init(stage);
+			stage.show();
+		} catch (final IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void addProject(File file, String name, boolean fromFile) {
+		final FileRepositoryBuilder builder = new FileRepositoryBuilder();
+		Repository repository;
+		try {
+			repository = builder.setGitDir(file).readEnvironment().findGitDir().build();
+			final Git git = new Git(repository);
+			final GitFxProject gitFxProject = new GitFxProject(git);
+			final ListenerHandle addIndexChangedListener = repository.getListenerList().addIndexChangedListener(new IndexChangedListener() {
+
+				@Override
+				public void onIndexChanged(IndexChangedEvent event) {
+					System.out.println("Bla");
+					System.out.println(event);
+				}
+			});
+			final ProjectModel projectModel = new ProjectModel(gitFxProject);
+			if (name == null) {
+				projectModel.setProjectName(new File(file.getParent()).getName());
+			} else {
+				projectModel.setProjectName(name);
+			}
+			projectModel.setCurrentBranch(gitFxProject.getGit().getRepository().getBranch());
+			projectModel.setChanges(gitFxProject.getUncommitedChangesNumber());
+			projectModel.setPath(file.getAbsolutePath());
+			startTimer(repository);
+			projectList.getItems().add(projectModel);
+			if(!fromFile) {
+				projectPersistentService.save(new PersistentProject(projectModel.getPath(), projectModel.getProjectName()));
+			}
+		} catch (final IOException e) {
+			LOGGER.error(e);
+		}
+
+	}
+
+	private File openExistingProjectFileChooser() {
+		File file = openDirectoryChooserAtLastOpened();
+		if (file != null) {
+			if (!file.getAbsolutePath().endsWith(".git")) {
+				file = new File(file, ".git");
+			}
+			for (final ProjectModel model : projectList.getItems()) {
+				if (model.getPath().equals(file.getAbsolutePath())) {
+					return null;
+				}
+			}
+			return file;
+		}
+		return null;
+	}
+
+	private File openDirectoryChooserAtLastOpened() {
+		final DirectoryChooser chooser = new DirectoryChooser();
+		if (lastOpened != null) {
+			chooser.setInitialDirectory(lastOpened);
+		}
+		final File file = chooser.showDialog(getStage());
+		if (file != null) {
+			lastOpened = file;
+			propertyService.saveProperty(LASTOPEN_PROPERTY, file.getAbsolutePath());
+		}
+		return file;
 	}
 }

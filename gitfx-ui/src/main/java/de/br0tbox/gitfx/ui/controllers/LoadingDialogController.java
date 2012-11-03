@@ -62,7 +62,7 @@ public class LoadingDialogController extends AbstractController {
 		stage = new Stage();
 		final Scene scene = new Scene(pane);
 		stage.setScene(scene);
-		stage.show();
+		stage.showAndWait();
 	}
 	
 	public void hide() {
