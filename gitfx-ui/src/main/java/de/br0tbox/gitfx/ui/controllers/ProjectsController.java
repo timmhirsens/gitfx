@@ -123,9 +123,13 @@ public class ProjectsController extends AbstractController {
 				if (file != null) {
 					lastOpened = file;
 					propertyService.saveProperty(LASTOPEN_PROPERTY, file.getAbsolutePath());
-					System.out.println(file.getAbsolutePath());
 					if (!file.getAbsolutePath().endsWith(".git")) {
 						file = new File(file, ".git");
+					}
+					for (final ProjectModel model : projectList.getItems()) {
+						if (model.getPath().equals(file.getAbsolutePath())) {
+							return;
+						}
 					}
 					final FileRepositoryBuilder builder = new FileRepositoryBuilder();
 					Repository repository;
@@ -133,10 +137,6 @@ public class ProjectsController extends AbstractController {
 						repository = builder.setGitDir(file).readEnvironment().findGitDir().build();
 						final Git git = new Git(repository);
 						final GitFxProject gitFxProject = new GitFxProject(git);
-						final Set<String> allUncommitedChanges = gitFxProject.getAllUncommitedChanges();
-						for (final String uncommitedChange : allUncommitedChanges) {
-							System.out.println(uncommitedChange);
-						}
 						final ListenerHandle addIndexChangedListener = repository.getListenerList().addIndexChangedListener(new IndexChangedListener() {
 
 							@Override
@@ -145,11 +145,12 @@ public class ProjectsController extends AbstractController {
 								System.out.println(event);
 							}
 						});
-						startTimer(repository);
 						final ProjectModel projectModel = new ProjectModel(gitFxProject);
 						projectModel.setProjectName(new File(file.getParent()).getName());
 						projectModel.setCurrentBranch(gitFxProject.getGit().getRepository().getBranch());
 						projectModel.setChanges(gitFxProject.getUncommitedChangesNumber());
+						projectModel.setPath(file.getAbsolutePath());
+						startTimer(repository);
 						projectList.getItems().add(projectModel);
 					} catch (final IOException e) {
 						LOGGER.error(e);

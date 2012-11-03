@@ -6,9 +6,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import javax.inject.Inject;
 
@@ -64,6 +67,13 @@ public class GitFxApplication extends GuiceApplication {
 		final Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
 		primaryStage.show();
+		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			
+			@Override
+			public void handle(WindowEvent arg0) {
+				Platform.exit();
+			}
+		});
 		LOGGER.debug("Startup finished");
 	}
 

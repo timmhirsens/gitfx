@@ -11,12 +11,13 @@ public class ProjectModel {
 	private SimpleIntegerProperty changes = new SimpleIntegerProperty();
 	private SimpleStringProperty projectName = new SimpleStringProperty("");
 	private SimpleStringProperty currentBranch = new SimpleStringProperty("");
+	private SimpleStringProperty path = new SimpleStringProperty("");
 	private ObservableList<GitFxCommit> commits = FXCollections.observableArrayList();
+	private GitFxProject fxProject;
+
 	public ObservableList<GitFxCommit> getCommits() {
 		return commits;
 	}
-
-	private GitFxProject fxProject;
 
 	public GitFxProject getFxProject() {
 		return fxProject;
@@ -49,6 +50,14 @@ public class ProjectModel {
 
 	public void setProjectName(String projectName) {
 		this.projectName.set(projectName);
+	}
+	
+	public String getPath() {
+		return path.get();
+	}
+
+	public void setPath(String path) {
+		this.path.set(path);
 	}
 
 	@Override
