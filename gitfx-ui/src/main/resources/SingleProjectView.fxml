@@ -39,20 +39,15 @@
                     </ToolBar>
                     <TableView fx:id="tableView" prefHeight="349.0" prefWidth="1078.0" style="&#10;">
                       <columns>
-                        <TableColumn prefWidth="75.0" text="x" />
-                        <TableColumn prefWidth="75.0" text="Commit">
+                        <TableColumn prefWidth="850.0" sortable="false" text="Message" />
+                        <TableColumn prefWidth="75.0" sortable="false" text="Commit">
                           <cellValueFactory>
                             <PropertyValueFactory property="hash" />
                           </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="75.0" text="Author">
+                        <TableColumn prefWidth="75.0" sortable="false" text="Author">
                           <cellValueFactory>
                             <PropertyValueFactory property="author" />
-                          </cellValueFactory>
-                        </TableColumn>
-                        <TableColumn prefWidth="980.0" text="Commit Message">
-                          <cellValueFactory>
-                            <PropertyValueFactory property="message" />
                           </cellValueFactory>
                         </TableColumn>
                       </columns>

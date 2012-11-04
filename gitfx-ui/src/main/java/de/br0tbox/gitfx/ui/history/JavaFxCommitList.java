@@ -16,7 +16,7 @@ public class JavaFxCommitList extends PlotCommitList<JavaFxLane> {
 	// private static final Color[] COLORS = new Color[] { Color.ALICEBLUE,
 	// Color.BEIGE, Color.BLANCHEDALMOND, Color.SPRINGGREEN, Color.BLUEVIOLET,
 	// Color.CHARTREUSE, Color.RED, Color.YELLOW };
-	private static final Color[] COLORS = new Color[] { Color.GREEN, Color.RED, Color.BLUE, Color.BROWN, Color.VIOLET, Color.CYAN, Color.MAGENTA, Color.DARKCYAN };
+	private static final Color[] COLORS = new Color[] { Color.GREEN, Color.RED, Color.BLUE, Color.BROWN, Color.VIOLET, Color.CYAN, Color.MAGENTA, Color.DARKCYAN, Color.CORNFLOWERBLUE };
 	private List<Color> allColors;
 	private LinkedList<Color> availableColors;
 

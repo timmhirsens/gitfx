@@ -28,6 +28,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
@@ -131,6 +132,7 @@ public class SingleProjectController extends AbstractController {
 					final Stage stage = new Stage();
 					stage.setScene(new Scene((Parent) result.getRoot()));
 					stage.setResizable(false);
+					stage.initModality(Modality.APPLICATION_MODAL);
 					commitController.setProjectModel(projectModel);
 					commitController.init(stage);
 					stage.showAndWait();
@@ -196,7 +198,6 @@ public class SingleProjectController extends AbstractController {
 			final Repository repository = projectModel.getFxProject().getGit().getRepository();
 			final RevWalk revWalk = new PlotWalk(repository);
 			revWalk.markStart(revWalk.parseCommit(repository.getRef("HEAD").getObjectId()));
-			// addCommitsToView(log);
 			final JavaFxCommitList commitList = new JavaFxCommitList();
 			commitList.source(revWalk);
 			commitList.fillTo(512);

@@ -6,8 +6,6 @@
     -fx-background-color: lightyellow;
 }
 .table-row-cell:filled {
-    -fx-background-color: white;
 }
 .table-row-cell:selected {
-    -fx-background-color: grey;
 }

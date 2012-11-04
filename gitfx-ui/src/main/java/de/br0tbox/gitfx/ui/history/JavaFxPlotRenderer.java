@@ -4,10 +4,9 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.RectangleBuilder;
 import javafx.scene.text.Text;
 
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revplot.AbstractPlotRenderer;
 import org.eclipse.jgit.revplot.PlotCommit;
@@ -27,15 +26,26 @@ public class JavaFxPlotRenderer extends AbstractPlotRenderer<JavaFxLane, Color> 
 
 	@Override
 	protected int drawLabel(int x, int y, Ref ref) {
-		final Text text = new Text(ref.getName());
+		String refName = ref.getName();
+		if (refName.contains(Constants.R_HEADS)) {
+			refName = refName.substring(Constants.R_HEADS.length(), refName.length());
+		}
+		if (refName.contains(Constants.R_REMOTES)) {
+			refName = refName.substring(Constants.R_REMOTES.length(), refName.length());
+		}
+		if (refName.contains(Constants.R_TAGS)) {
+			refName = refName.substring(Constants.R_TAGS.length(), refName.length());
+		}
+		final Text text = new Text(refName);
 		text.setX(x);
-		text.setY(y * 2);
+		text.setY(y * 1.5);
+		text.setFill(Color.RED);
 		final double fontSize = text.getFont().getSize();
-		final int width = (int) Math.floor(fontSize * ref.getName().trim().length() / 2);
-		final Rectangle rectangle = RectangleBuilder.create().x(x).y(y / 1.5).width(width).height(fontSize + 1).fill(Color.RED).build();
-		currentShape.getChildren().add(rectangle);
+		final int width = (int) Math.floor(fontSize * refName.trim().length() / 2);
+		// final Rectangle rectangle = RectangleBuilder.create().x(x).y(y /
+		// 2).width(width).height(fontSize + 3).fill(Color.RED).build();
+		// currentShape.getChildren().add(rectangle);
 		currentShape.getChildren().add(text);
-		System.out.println(width);
 		return (int) Math.floor(10 + width);
 	}
 
@@ -68,7 +78,7 @@ public class JavaFxPlotRenderer extends AbstractPlotRenderer<JavaFxLane, Color> 
 		circle.setCenterX(Math.floor(x + w / 2) + 1);
 		circle.setCenterY(Math.floor(y + h / 2));
 		circle.setRadius(Math.floor(w / 2));
-		circle.setFill(Color.DARKBLUE);
+		circle.setFill(Color.DARKGRAY);
 		final Circle innerCircle = new Circle();
 		innerCircle.setCenterX(Math.floor(x + w / 2 + 1));
 		innerCircle.setCenterY(Math.floor(y + h / 2));
@@ -84,8 +94,14 @@ public class JavaFxPlotRenderer extends AbstractPlotRenderer<JavaFxLane, Color> 
 		circle.setCenterX(x + w / 2);
 		circle.setCenterY(y + h / 2);
 		circle.setRadius(h / 2);
-		circle.setFill(Color.AQUA);
+		circle.setFill(Color.GRAY);
+		final Circle innerCircle = new Circle();
+		innerCircle.setCenterX(Math.floor(x + w / 2 + 1));
+		innerCircle.setCenterY(Math.floor(y + h / 2));
+		innerCircle.setRadius(Math.floor(w / 2 - 2));
+		innerCircle.setFill(Color.LIGHTGRAY);
 		currentShape.getChildren().add(circle);
+		currentShape.getChildren().add(innerCircle);
 	}
 
 	@Override
