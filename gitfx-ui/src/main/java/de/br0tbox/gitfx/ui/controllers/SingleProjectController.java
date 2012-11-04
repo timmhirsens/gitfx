@@ -10,7 +10,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.ObservableValueBase;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -34,9 +33,6 @@ import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.LogCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -117,31 +113,24 @@ public class SingleProjectController extends AbstractController {
 				}
 			}
 		});
-		addCommitButtonListener();
 		addUncommitedChangesListener();
 	}
 
-	private void addCommitButtonListener() {
-		commitButton.setOnAction(new EventHandler<ActionEvent>() {
-
-			@Override
-			public void handle(ActionEvent arg0) {
-				try {
-					final Result result = fxmlLoader.load(getClass().getResource("/CommitDialogView.fxml"));
-					final CommitDialogController commitController = result.getController();
-					final Stage stage = new Stage();
-					stage.setScene(new Scene((Parent) result.getRoot()));
-					stage.setResizable(false);
-					stage.initModality(Modality.APPLICATION_MODAL);
-					commitController.setProjectModel(projectModel);
-					commitController.init(stage);
-					stage.showAndWait();
-				} catch (final IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		});
+	public void commitButtonClicked() {
+		try {
+			final Result result = fxmlLoader.load(getClass().getResource("/CommitDialogView.fxml"));
+			final CommitDialogController commitController = result.getController();
+			final Stage stage = new Stage();
+			stage.setScene(new Scene((Parent) result.getRoot()));
+			stage.setResizable(false);
+			stage.initModality(Modality.APPLICATION_MODAL);
+			commitController.setProjectModel(projectModel);
+			commitController.init(stage);
+			stage.showAndWait();
+		} catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void addUncommitedChangesListener() {
@@ -197,7 +186,7 @@ public class SingleProjectController extends AbstractController {
 		try {
 			final Repository repository = projectModel.getFxProject().getGit().getRepository();
 			final RevWalk revWalk = new PlotWalk(repository);
-			revWalk.markStart(revWalk.parseCommit(repository.getRef("HEAD").getObjectId()));
+			revWalk.markStart(revWalk.parseCommit(repository.getRef("master").getObjectId()));
 			final JavaFxCommitList commitList = new JavaFxCommitList();
 			commitList.source(revWalk);
 			commitList.fillTo(512);
@@ -276,33 +265,27 @@ public class SingleProjectController extends AbstractController {
 		branchesItem.getChildren().clear();
 		remotesItem.getChildren().clear();
 		tagsItem.getChildren().clear();
-		for (final String local : localList) {
+		for (String local : localList) {
+			if (local.startsWith(Constants.R_HEADS)) {
+				local = local.substring(Constants.R_HEADS.length(), local.length());
+			}
 			branchesItem.getChildren().add(new TreeItem(local));
 		}
-		for (final String remote : remoteList) {
+		for (String remote : remoteList) {
+			if (remote.startsWith(Constants.R_REMOTES)) {
+				remote = remote.substring(Constants.R_REMOTES.length(), remote.length());
+			}
 			remotesItem.getChildren().add(new TreeItem(remote));
 		}
-		for (final String tag : tagsList) {
+		for (String tag : tagsList) {
+			if (tag.startsWith(Constants.R_TAGS)) {
+				tag = tag.substring(Constants.R_TAGS.length(), tag.length());
+			}
 			tagsItem.getChildren().add(new TreeItem(tag));
 		}
 		branchesItem.expandedProperty().set(true);
 		remotesItem.expandedProperty().set(true);
 		tagsItem.expandedProperty().set(true);
-	}
-
-	private void addCommitsToView(final LogCommand log) throws GitAPIException, NoHeadException {
-		final Iterable<RevCommit> call = log.call();
-		final Iterator<RevCommit> iterator = call.iterator();
-		projectModel.getCommits().clear();
-		while (iterator.hasNext()) {
-			final RevCommit revCommit = iterator.next();
-			final String shortMessage = revCommit.getShortMessage();
-			final String name = revCommit.getAuthorIdent().getName();
-			final String hash = revCommit.getId().abbreviate(7).name();
-			// final GitFxCommit gitFxCommit = new GitFxCommit(hash, name,
-			// shortMessage);
-			// projectModel.getCommits().add(gitFxCommit);
-		}
 	}
 
 	public void setProject(ProjectModel projectModel) {
