@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.ObservableValueBase;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -17,6 +18,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -26,6 +30,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Callback;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LogCommand;
@@ -44,6 +49,8 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revplot.PlotCommit;
+import org.eclipse.jgit.revplot.PlotWalk;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
@@ -54,6 +61,9 @@ import com.cathive.fx.guice.FXMLController;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
 
 import de.br0tbox.gitfx.ui.fx.ChangedFileListCell;
+import de.br0tbox.gitfx.ui.history.CommitTableCell;
+import de.br0tbox.gitfx.ui.history.JavaFxCommitList;
+import de.br0tbox.gitfx.ui.history.JavaFxPlotRenderer;
 import de.br0tbox.gitfx.ui.uimodel.GitFxCommit;
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 
@@ -179,15 +189,52 @@ public class SingleProjectController extends AbstractController {
 	private void modelToView() {
 		getStage().setTitle(projectModel.getProjectName() + " (" + projectModel.getCurrentBranch() + ") - GitFx");
 		getStage().getIcons().add(new Image(SingleProjectController.class.getResourceAsStream("/icons/package.png")));
-		final LogCommand log = projectModel.getFxProject().getGit().log();
+		// final LogCommand log = projectModel.getFxProject().getGit().log();
 		// Commits
 		tableView.getItems().clear();
-		tableView.setItems(projectModel.getCommits());
+		// tableView.setItems(projectModel.getCommits());
 		try {
-			addCommitsToView(log);
+			final Repository repository = projectModel.getFxProject().getGit().getRepository();
+			final RevWalk revWalk = new PlotWalk(repository);
+			revWalk.markStart(revWalk.parseCommit(repository.getRef("HEAD").getObjectId()));
+			// addCommitsToView(log);
+			final JavaFxCommitList commitList = new JavaFxCommitList();
+			commitList.source(revWalk);
+			commitList.fillTo(512);
+			PlotCommit<?>[] array = new PlotCommit[commitList.size()];
+			array = commitList.toArray(array);
+			final List<GitFxCommit> commits = new ArrayList<>(array.length);
+			for (final PlotCommit<?> commit : array) {
+				final GitFxCommit gitFxCommit = new GitFxCommit(commit.abbreviate(7).name(), commit.getAuthorIdent().getName(), commit.getShortMessage(), commit);
+				commits.add(gitFxCommit);
+			}
+			final JavaFxPlotRenderer renderer = new JavaFxPlotRenderer();
+			final TableColumn<GitFxCommit, GitFxCommit> tableColumn = (TableColumn<GitFxCommit, GitFxCommit>) tableView.getColumns().get(0);
+			tableColumn.setCellFactory(new Callback<TableColumn<GitFxCommit, GitFxCommit>, TableCell<GitFxCommit, GitFxCommit>>() {
+
+				@Override
+				public TableCell<GitFxCommit, GitFxCommit> call(TableColumn<GitFxCommit, GitFxCommit> arg0) {
+					return new CommitTableCell<>(renderer);
+				}
+			});
+			tableColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GitFxCommit, GitFxCommit>, ObservableValue<GitFxCommit>>() {
+
+				@Override
+				public ObservableValue<GitFxCommit> call(final CellDataFeatures<GitFxCommit, GitFxCommit> dataFeatures) {
+					return new ObservableValueBase<GitFxCommit>() {
+
+						@Override
+						public GitFxCommit getValue() {
+							return dataFeatures.getValue();
+						}
+					};
+				}
+			});
+			tableView.getItems().addAll(commits);
+			revWalk.release();
 			// Branches
 			addBranchesToView();
-		} catch (final GitAPIException | IOException e) {
+		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -251,8 +298,9 @@ public class SingleProjectController extends AbstractController {
 			final String shortMessage = revCommit.getShortMessage();
 			final String name = revCommit.getAuthorIdent().getName();
 			final String hash = revCommit.getId().abbreviate(7).name();
-			final GitFxCommit gitFxCommit = new GitFxCommit(hash, name, shortMessage);
-			projectModel.getCommits().add(gitFxCommit);
+			// final GitFxCommit gitFxCommit = new GitFxCommit(hash, name,
+			// shortMessage);
+			// projectModel.getCommits().add(gitFxCommit);
 		}
 	}
 

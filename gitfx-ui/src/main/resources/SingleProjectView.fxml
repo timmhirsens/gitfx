@@ -37,6 +37,7 @@
                     </ToolBar>
                     <TableView fx:id="tableView" prefHeight="349.0" prefWidth="1078.0">
                       <columns>
+                        <TableColumn prefWidth="75.0" text="x" />
                         <TableColumn prefWidth="75.0" text="Commit">
                           <cellValueFactory>
                             <PropertyValueFactory property="hash" />

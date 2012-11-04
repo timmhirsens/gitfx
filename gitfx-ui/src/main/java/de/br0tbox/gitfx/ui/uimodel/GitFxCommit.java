@@ -3,14 +3,18 @@ package de.br0tbox.gitfx.ui.uimodel;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import org.eclipse.jgit.revplot.PlotCommit;
+
 public class GitFxCommit {
 
 	private StringProperty hash = new SimpleStringProperty();
 	private StringProperty author = new SimpleStringProperty();
 	private StringProperty message = new SimpleStringProperty();
+	private PlotCommit<?> commit;
 
-	public GitFxCommit(String hash, String author, String message) {
+	public GitFxCommit(String hash, String author, String message, PlotCommit<?> commit) {
 		super();
+		this.commit = commit;
 		this.author.set(author);
 		this.message.set(message);
 		this.hash.set(hash);
@@ -38,6 +42,14 @@ public class GitFxCommit {
 
 	public void setHash(String hash) {
 		this.hash.set(hash);
+	}
+
+	public PlotCommit<?> getCommit() {
+		return commit;
+	}
+
+	public void setCommit(PlotCommit<?> commit) {
+		this.commit = commit;
 	}
 
 }
