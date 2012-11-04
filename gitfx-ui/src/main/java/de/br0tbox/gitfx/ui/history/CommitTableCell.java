@@ -23,8 +23,8 @@ public class CommitTableCell<S> extends TableCell<S, GitFxCommit> {
 			return;
 		}
 		final PlotCommit<?> commit = item.getCommit();
-		fxPlotRenderer.draw((PlotCommit<JavaFxLane>) commit, 20);
-		final Group currentShape = fxPlotRenderer.getCurrentShape();
+		@SuppressWarnings("unchecked")
+		final Group currentShape = fxPlotRenderer.draw((PlotCommit<JavaFxLane>) commit, 24);
 		setGraphic(currentShape);
 	}
 }

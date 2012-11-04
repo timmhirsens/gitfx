@@ -3,8 +3,10 @@
 <?import de.br0tbox.gitfx.ui.fx.*?>
 <?import de.br0tbox.gitfx.ui.uimodel.*?>
 <?import java.lang.*?>
+<?import java.net.*?>
 <?import java.util.*?>
 <?import javafx.collections.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.control.TreeItem?>
 <?import javafx.scene.control.cell.*?>
@@ -35,7 +37,7 @@
                         <ToggleButton fx:id="listButton" mnemonicParsing="false" selected="true" text="List" />
                       </items>
                     </ToolBar>
-                    <TableView fx:id="tableView" prefHeight="349.0" prefWidth="1078.0">
+                    <TableView fx:id="tableView" prefHeight="349.0" prefWidth="1078.0" style="&#10;">
                       <columns>
                         <TableColumn prefWidth="75.0" text="x" />
                         <TableColumn prefWidth="75.0" text="Commit">
@@ -54,6 +56,9 @@
                           </cellValueFactory>
                         </TableColumn>
                       </columns>
+                      <VBox.margin>
+                        <Insets />
+                      </VBox.margin>
                     </TableView>
                   </children>
                 </VBox>
@@ -166,4 +171,7 @@
       </top>
     </BorderPane>
   </children>
+  <stylesheets>
+    <URL value="@stylesheet.css" />
+  </stylesheets>
 </AnchorPane>

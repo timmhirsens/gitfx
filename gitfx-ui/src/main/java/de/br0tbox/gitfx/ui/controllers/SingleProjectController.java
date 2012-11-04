@@ -106,7 +106,6 @@ public class SingleProjectController extends AbstractController {
 		addCommitClickedListener();
 		addProjectListeners();
 		setCommitButtonText(projectModel.getChanges());
-		getStage().setResizable(false);
 		getStage().setOnCloseRequest(new EventHandler<WindowEvent>() {
 			// Clean up listeners when project is closed.
 			@Override
@@ -214,7 +213,8 @@ public class SingleProjectController extends AbstractController {
 
 				@Override
 				public TableCell<GitFxCommit, GitFxCommit> call(TableColumn<GitFxCommit, GitFxCommit> arg0) {
-					return new CommitTableCell<>(renderer);
+					final CommitTableCell<GitFxCommit> commitTableCell = new CommitTableCell<>(renderer);
+					return commitTableCell;
 				}
 			});
 			tableColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GitFxCommit, GitFxCommit>, ObservableValue<GitFxCommit>>() {

@@ -1,0 +1,13 @@
+.table-row-cell .table-cell {
+	-fx-border-width:0px;
+	-fx-padding:0px 0px 0px 3px;
+} 
+.table-row-cell:empty {
+    -fx-background-color: lightyellow;
+}
+.table-row-cell:filled {
+    -fx-background-color: white;
+}
+.table-row-cell:selected {
+    -fx-background-color: grey;
+}
