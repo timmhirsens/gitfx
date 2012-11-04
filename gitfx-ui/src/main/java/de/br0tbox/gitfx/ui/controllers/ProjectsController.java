@@ -131,10 +131,12 @@ public class ProjectsController extends AbstractController {
 
 	private void loadProjects() {
 		final List<PersistentProject> loadedProjects = projectPersistentService.loadAll();
-		for (final PersistentProject project : loadedProjects) {
-			final String path = project.getPath();
-			final String name = project.getName();
-			addProject(new File(path), name, true);
+		if(loadedProjects != null) {
+			for (final PersistentProject project : loadedProjects) {
+				final String path = project.getPath();
+				final String name = project.getName();
+				addProject(new File(path), name, true);
+			}
 		}
 	}
 
