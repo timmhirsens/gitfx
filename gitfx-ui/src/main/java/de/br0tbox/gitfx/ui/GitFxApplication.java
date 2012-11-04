@@ -22,6 +22,7 @@ import com.cathive.fx.guice.GuiceApplication;
 import com.cathive.fx.guice.GuiceFXMLLoader;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
 import com.google.inject.Module;
+import com.sun.javafx.runtime.VersionInfo;
 
 import de.br0tbox.gitfx.ui.controllers.AbstractController;
 import de.br0tbox.gitfx.ui.modules.MainModule;
@@ -61,6 +62,7 @@ public class GitFxApplication extends GuiceApplication {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		LOGGER.debug("Starting Application");
+		LOGGER.debug("Running JavaFX version {}", VersionInfo.getRuntimeVersion());
 		final Result result = fxmlLoader.load(this.getClass().getResource("/ProjectView.fxml"));
 		final Parent root = result.getRoot();
 		result.<AbstractController> getController().init(primaryStage);
@@ -68,7 +70,7 @@ public class GitFxApplication extends GuiceApplication {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-			
+
 			@Override
 			public void handle(WindowEvent arg0) {
 				Platform.exit();

@@ -3,10 +3,10 @@ package de.br0tbox.gitfx.ui.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -28,10 +28,8 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.events.IndexChangedEvent;
 import org.eclipse.jgit.events.IndexChangedListener;
 import org.eclipse.jgit.events.ListenerHandle;
-import org.eclipse.jgit.lib.IndexDiff;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.treewalk.FileTreeIterator;
 
 import com.cathive.fx.guice.FXMLController;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
@@ -119,9 +117,9 @@ public class ProjectsController extends AbstractController {
 				}
 			}
 		});
-		
+
 		deleteButton.setOnAction(new EventHandler<ActionEvent>() {
-			
+
 			@Override
 			public void handle(ActionEvent arg0) {
 				final ProjectModel selectedItem = projectList.getSelectionModel().getSelectedItem();
@@ -140,18 +138,29 @@ public class ProjectsController extends AbstractController {
 		}
 	}
 
-	private void startTimer(final Repository repository) {
+	private void startTimer(final ProjectModel projectModel) {
 		final TimerTask task = new TimerTask() {
+			Repository repository = projectModel.getFxProject().getGit().getRepository();
 
 			@Override
 			public void run() {
 				try {
-					final IndexDiff diff = new IndexDiff(repository, repository.getRef("HEAD").getObjectId(), new FileTreeIterator(repository));
-					diff.diff();
-					final Set<String> untracked = diff.getUntracked();
-					if (untracked.size() > 0) {
-						System.out.println(untracked);
-					}
+					// final IndexDiff diff = new IndexDiff(repository,
+					// repository.getRef("HEAD").getObjectId(), new
+					// FileTreeIterator(repository));
+					// diff.diff();
+					// final Set<String> untracked = diff.getUntracked();
+					// if (untracked.size() > 0) {
+					// System.out.println(untracked);
+					// }
+					final Integer uncommitedChangesNumber = projectModel.getFxProject().getUncommitedChangesNumber();
+					Platform.runLater(new Runnable() {
+
+						@Override
+						public void run() {
+							projectModel.getChangesProperty().set(uncommitedChangesNumber);
+						}
+					});
 					repository.scanForRepoChanges();
 				} catch (final IOException e) {
 					LOGGER.error(e);
@@ -204,9 +213,9 @@ public class ProjectsController extends AbstractController {
 			projectModel.setCurrentBranch(gitFxProject.getGit().getRepository().getBranch());
 			projectModel.setChanges(gitFxProject.getUncommitedChangesNumber());
 			projectModel.setPath(file.getAbsolutePath());
-			startTimer(repository);
+			startTimer(projectModel);
 			projectList.getItems().add(projectModel);
-			if(!fromFile) {
+			if (!fromFile) {
 				projectPersistentService.save(new PersistentProject(projectModel.getPath(), projectModel.getProjectName()));
 			}
 		} catch (final IOException e) {

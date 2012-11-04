@@ -129,7 +129,7 @@
                 </Button>
                 <Button fx:id="commitButton" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" text="Commit">
                   <graphic>
-                    <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+                    <ImageView fx:id="commitButtonImage" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>
                         <Image url="@icons/accept.png" preserveRatio="false" smooth="false" />
                       </image>

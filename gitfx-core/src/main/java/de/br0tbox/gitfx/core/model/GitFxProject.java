@@ -23,6 +23,8 @@ public class GitFxProject {
 			uncommitedChanges.addAll(status.getAdded());
 			uncommitedChanges.addAll(status.getChanged());
 			uncommitedChanges.addAll(status.getModified());
+			uncommitedChanges.addAll(status.getRemoved());
+			uncommitedChanges.addAll(status.getMissing());
 			uncommitedChanges.addAll(status.getUntracked());
 			return uncommitedChanges;
 		} catch (NoWorkTreeException | GitAPIException e) {

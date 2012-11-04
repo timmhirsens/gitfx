@@ -25,15 +25,14 @@ public class ProjectModel {
 
 	public ProjectModel(GitFxProject fxProject) {
 		this.fxProject = fxProject;
-
 	}
 
 	public int getChanges() {
-		return changes.get();
+		return getChangesProperty().get();
 	}
 
 	public void setChanges(int changes) {
-		this.changes.set(changes);
+		this.getChangesProperty().set(changes);
 	}
 
 	public String getCurrentBranch() {
@@ -51,7 +50,7 @@ public class ProjectModel {
 	public void setProjectName(String projectName) {
 		this.projectName.set(projectName);
 	}
-	
+
 	public String getPath() {
 		return path.get();
 	}
@@ -62,7 +61,11 @@ public class ProjectModel {
 
 	@Override
 	public String toString() {
-		return projectName.get() + " (" + currentBranch.get() + ")" + " (" + changes.get() + ")";
+		return projectName.get() + " (" + currentBranch.get() + ")" + " (" + getChangesProperty().get() + ")";
+	}
+
+	public SimpleIntegerProperty getChangesProperty() {
+		return changes;
 	}
 
 }
