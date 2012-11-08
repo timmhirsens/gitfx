@@ -37,16 +37,18 @@ public class GitFxApplication extends GuiceApplication {
 	@Inject
 	private Set<IShutdownHook> shutdownHooks;
 
+	private static UncaughtExceptionHandler uncaughtExceptionHandler;
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+		uncaughtExceptionHandler = new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				LOGGER.error("Unhandled Exception: " + e.getMessage() + "", e);
 			}
-		});
+		};
 		launch(args);
 	}
 
@@ -66,6 +68,9 @@ public class GitFxApplication extends GuiceApplication {
 		final Result result = fxmlLoader.load(this.getClass().getResource("/ProjectView.fxml"));
 		final Parent root = result.getRoot();
 		result.<AbstractController> getController().init(primaryStage);
+		// XXX: This doesn't work yet, since Platform.runLater() swallows every Exception :/
+		// 		@see: http://javafx-jira.kenai.com/browse/RT-15332
+		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
 		final Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
 		primaryStage.show();

@@ -8,15 +8,15 @@ import de.br0tbox.gitfx.core.model.GitFxProject;
 
 public class ProjectModel {
 
-	private SimpleIntegerProperty changes = new SimpleIntegerProperty();
-	private SimpleStringProperty projectName = new SimpleStringProperty("");
-	private SimpleStringProperty currentBranch = new SimpleStringProperty("");
-	private SimpleStringProperty path = new SimpleStringProperty("");
-	private ObservableList<GitFxCommit> commits = FXCollections.observableArrayList();
+	private SimpleIntegerProperty changesProperty = new SimpleIntegerProperty();
+	private SimpleStringProperty projectNameProperty = new SimpleStringProperty("");
+	private SimpleStringProperty currentBranchProperty = new SimpleStringProperty("");
+	private SimpleStringProperty pathProperty = new SimpleStringProperty("");
+	private ObservableList<GitFxCommit> commitsProperty = FXCollections.observableArrayList();
 	private GitFxProject fxProject;
 
 	public ObservableList<GitFxCommit> getCommits() {
-		return commits;
+		return commitsProperty;
 	}
 
 	public GitFxProject getFxProject() {
@@ -36,36 +36,52 @@ public class ProjectModel {
 	}
 
 	public String getCurrentBranch() {
-		return currentBranch.get();
+		return currentBranchProperty.get();
 	}
 
 	public void setCurrentBranch(String currentBranch) {
-		this.currentBranch.set(currentBranch);
+		this.currentBranchProperty.set(currentBranch);
 	}
 
 	public String getProjectName() {
-		return projectName.get();
+		return projectNameProperty.get();
 	}
 
 	public void setProjectName(String projectName) {
-		this.projectName.set(projectName);
+		this.projectNameProperty.set(projectName);
 	}
 
 	public String getPath() {
-		return path.get();
+		return pathProperty.get();
 	}
 
 	public void setPath(String path) {
-		this.path.set(path);
+		this.pathProperty.set(path);
 	}
 
 	@Override
 	public String toString() {
-		return projectName.get() + " (" + currentBranch.get() + ")" + " (" + getChangesProperty().get() + ")";
+		return projectNameProperty.get() + " (" + currentBranchProperty.get() + ")" + " (" + getChangesProperty().get() + ")";
 	}
 
 	public SimpleIntegerProperty getChangesProperty() {
-		return changes;
+		return changesProperty;
+	}
+
+	public SimpleStringProperty getProjectNameProperty() {
+		return projectNameProperty;
+	}
+
+	public SimpleStringProperty getCurrentBranchProperty() {
+		return currentBranchProperty;
+	}
+
+	public SimpleStringProperty getPathProperty() {
+		return pathProperty;
+	}
+
+	public ObservableList<GitFxCommit> getCommitsProperty() {
+		return commitsProperty;
 	}
 
 }

@@ -2,13 +2,12 @@ package de.br0tbox.gitfx.ui.controllers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -24,10 +23,8 @@ import javax.inject.Inject;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.events.IndexChangedEvent;
-import org.eclipse.jgit.events.IndexChangedListener;
-import org.eclipse.jgit.events.ListenerHandle;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -38,6 +35,9 @@ import de.br0tbox.gitfx.core.model.GitFxProject;
 import de.br0tbox.gitfx.core.model.PersistentProject;
 import de.br0tbox.gitfx.core.services.IProjectPersistentService;
 import de.br0tbox.gitfx.core.services.IPropertyService;
+import de.br0tbox.gitfx.ui.progress.GitFxProgressMonitor;
+import de.br0tbox.gitfx.ui.progress.GitFxTask;
+import de.br0tbox.gitfx.ui.uimodel.GitRefreshTimerTask;
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 
 /**
@@ -51,6 +51,8 @@ public class ProjectsController extends AbstractController {
 	private static final String LASTOPEN_PROPERTY = "projectcontroller.lastopened";
 
 	private static final Logger LOGGER = LogManager.getLogger(ProjectsController.class);
+
+	private final Map<ProjectModel, TimerTask> refreshTimers = new HashMap<>();
 
 	@Inject
 	private IPropertyService propertyService;
@@ -87,51 +89,47 @@ public class ProjectsController extends AbstractController {
 				}
 			}
 		});
-		cloneButton.setOnMouseClicked(new EventHandler<Event>() {
+	}
 
-			@Override
-			public void handle(Event arg0) {
-				// TODO: Clone Project
-				// final File gitDir = new
-				// File(System.getProperty("user.home") +
-				// File.separatorChar + "gittest");
-				// gitDir.delete();
-				// gitDir.mkdirs();
-				// final CloneCommand cloneRepository =
-				// Git.cloneRepository();
-				// cloneRepository.setDirectory(gitDir).setURI("https://github.com/VanillaDev/Vanilla.git");
-				// final GitFxProgressMonitor fxProgressMonitor = new
-				// GitFxProgressMonitor();
-				// cloneRepository.setProgressMonitor(fxProgressMonitor);
-				// final GitFxTask fxTask = new
-				// GitFxTask(cloneRepository, fxProgressMonitor);
-				// runGitTaskWithProgressDialog(fxTask);
-			}
-		});
-		addButton.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent arg0) {
-				final File choosedProject = openExistingProjectFileChooser();
-				if (choosedProject != null) {
-					addProject(choosedProject, null, false);
-				}
-			}
-		});
+	@FXML
+	public void addButtonClicked() {
+		final File choosedProject = openExistingProjectFileChooser();
+		if (choosedProject != null) {
+			addProject(choosedProject, null, false);
+		}
+	}
 
-		deleteButton.setOnAction(new EventHandler<ActionEvent>() {
+	@FXML
+	public void cloneButtonClicked() {
+		final File gitDir = openDirectoryChooserAtLastOpened();
+		if (gitDir != null) {
+			gitDir.delete();
+			gitDir.mkdirs();
+			final CloneCommand cloneRepository = Git.cloneRepository();
+			cloneRepository.setDirectory(gitDir).setURI("https://github.com/VanillaDev/Vanilla.git");
+			final GitFxProgressMonitor fxProgressMonitor = new GitFxProgressMonitor();
+			cloneRepository.setProgressMonitor(fxProgressMonitor);
+			final GitFxTask fxTask = new GitFxTask(cloneRepository, fxProgressMonitor);
+			runGitTaskWithProgressDialog(fxTask);
+			addProject(gitDir, gitDir.getName(), false);
+		}
+	}
 
-			@Override
-			public void handle(ActionEvent arg0) {
-				final ProjectModel selectedItem = projectList.getSelectionModel().getSelectedItem();
-				projectList.getItems().remove(selectedItem);
-				projectPersistentService.delete(new PersistentProject(selectedItem.getPath(), selectedItem.getProjectName()));
-			}
-		});
+	@FXML
+	public void deleteSelectedProject() {
+		final ProjectModel selectedItem = projectList.getSelectionModel().getSelectedItem();
+		projectList.getItems().remove(selectedItem);
+		projectPersistentService.delete(new PersistentProject(selectedItem.getPath(), selectedItem.getProjectName()));
+		final TimerTask timerTask = refreshTimers.get(selectedItem);
+		if (timerTask != null) {
+			timerTask.cancel();
+			refreshTimers.remove(selectedItem);
+		}
 	}
 
 	private void loadProjects() {
 		final List<PersistentProject> loadedProjects = projectPersistentService.loadAll();
-		if(loadedProjects != null) {
+		if (loadedProjects != null) {
 			for (final PersistentProject project : loadedProjects) {
 				final String path = project.getPath();
 				final String name = project.getName();
@@ -141,36 +139,10 @@ public class ProjectsController extends AbstractController {
 	}
 
 	private void startTimer(final ProjectModel projectModel) {
-		final TimerTask task = new TimerTask() {
-			Repository repository = projectModel.getFxProject().getGit().getRepository();
-
-			@Override
-			public void run() {
-				try {
-					// final IndexDiff diff = new IndexDiff(repository,
-					// repository.getRef("HEAD").getObjectId(), new
-					// FileTreeIterator(repository));
-					// diff.diff();
-					// final Set<String> untracked = diff.getUntracked();
-					// if (untracked.size() > 0) {
-					// System.out.println(untracked);
-					// }
-					final Integer uncommitedChangesNumber = projectModel.getFxProject().getUncommitedChangesNumber();
-					Platform.runLater(new Runnable() {
-
-						@Override
-						public void run() {
-							projectModel.getChangesProperty().set(uncommitedChangesNumber);
-						}
-					});
-					repository.scanForRepoChanges();
-				} catch (final IOException e) {
-					LOGGER.error(e);
-				}
-			}
-		};
+		final TimerTask task = new GitRefreshTimerTask(projectModel);
 		final Timer timer = new Timer(true);
 		timer.scheduleAtFixedRate(task, 0, 4000);
+		refreshTimers.put(projectModel, task);
 	}
 
 	private void openSelectedProject() {
@@ -198,14 +170,6 @@ public class ProjectsController extends AbstractController {
 			repository = builder.setGitDir(file).readEnvironment().findGitDir().build();
 			final Git git = new Git(repository);
 			final GitFxProject gitFxProject = new GitFxProject(git);
-			final ListenerHandle addIndexChangedListener = repository.getListenerList().addIndexChangedListener(new IndexChangedListener() {
-
-				@Override
-				public void onIndexChanged(IndexChangedEvent event) {
-					System.out.println("Bla");
-					System.out.println(event);
-				}
-			});
 			final ProjectModel projectModel = new ProjectModel(gitFxProject);
 			if (name == null) {
 				projectModel.setProjectName(new File(file.getParent()).getName());

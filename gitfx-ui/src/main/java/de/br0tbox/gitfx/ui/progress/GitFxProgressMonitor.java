@@ -1,25 +1,28 @@
 package de.br0tbox.gitfx.ui.progress;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.ProgressIndicator;
 
 import org.eclipse.jgit.lib.ProgressMonitor;
 
 public class GitFxProgressMonitor implements ProgressMonitor {
 
-	private ProgressIndicator progressIndicator;
 	private SimpleDoubleProperty progressProperty = new SimpleDoubleProperty();
-	private StringProperty titleProperty;
+	private StringProperty titleProperty = new SimpleStringProperty();
 	private int currentTaskTotalWork;
 
-	public void setTitleProperty(StringProperty titleProperty) {
-		this.titleProperty = titleProperty;
+	private int currentTaskDone;
+
+	public SimpleDoubleProperty getProgressProperty() {
+		return progressProperty;
 	}
 
-	private int currentTaskDone;
+	public StringProperty getTitleProperty() {
+		return titleProperty;
+	}
+
 	private String currentTaskTitle;
 	private int tasksRemaining;
 
@@ -28,14 +31,6 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 	}
 
 	private void init() {
-		progressProperty.addListener(new ChangeListener<Number>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				// FIXME: wieso geht hier nicht Double als Typ?
-				progressIndicator.setProgress((Double) newValue);
-			}
-		});
 	}
 
 	@Override
@@ -45,10 +40,15 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 	}
 
 	@Override
-	public void beginTask(String title, int totalWork) {
+	public void beginTask(String title, final int totalWork) {
 		this.currentTaskTitle = title;
-		titleProperty.setValue(currentTaskTitle + " (0 of " + totalWork+")");
-		progressProperty.set(0.0);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				titleProperty.setValue(currentTaskTitle + " (0 of " + totalWork + ")");
+				progressProperty.set(0.0);
+			}
+		});
 		currentTaskTotalWork = totalWork;
 		currentTaskDone = 0;
 	}
@@ -57,25 +57,31 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 	public void update(int completed) {
 		currentTaskDone += completed;
 		final double progess = (double) currentTaskDone / (double) currentTaskTotalWork;
-		titleProperty.setValue(currentTaskTitle + " (" + currentTaskDone + " of " + currentTaskTotalWork+")");
-		progressProperty.set(progess);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				titleProperty.setValue(currentTaskTitle + " (" + currentTaskDone + " of " + currentTaskTotalWork + ")");
+				progressProperty.set(progess);
+			}
+		});
 	}
 
 	@Override
 	public void endTask() {
 		currentTaskDone = 0;
 		currentTaskTotalWork = 0;
-		progressProperty.set(1.0);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				progressProperty.set(1.0);
+			}
+		});
 		tasksRemaining--;
 	}
 
 	@Override
 	public boolean isCancelled() {
 		return false;
-	}
-
-	public void setProgressIndicator(ProgressIndicator progressIndicator) {
-		this.progressIndicator = progressIndicator;
 	}
 
 }
