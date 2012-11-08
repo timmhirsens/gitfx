@@ -111,7 +111,7 @@ public class ProjectsController extends AbstractController {
 			cloneRepository.setProgressMonitor(fxProgressMonitor);
 			final GitFxTask fxTask = new GitFxTask(cloneRepository, fxProgressMonitor);
 			runGitTaskWithProgressDialog(fxTask);
-			addProject(gitDir, gitDir.getName(), false);
+			addProject(new File(gitDir, ".git"), gitDir.getName(), false);
 		}
 	}
 
@@ -119,6 +119,7 @@ public class ProjectsController extends AbstractController {
 	public void deleteSelectedProject() {
 		final ProjectModel selectedItem = projectList.getSelectionModel().getSelectedItem();
 		projectList.getItems().remove(selectedItem);
+		selectedItem.getFxProject().getGit().getRepository().close();
 		projectPersistentService.delete(new PersistentProject(selectedItem.getPath(), selectedItem.getProjectName()));
 		final TimerTask timerTask = refreshTimers.get(selectedItem);
 		if (timerTask != null) {

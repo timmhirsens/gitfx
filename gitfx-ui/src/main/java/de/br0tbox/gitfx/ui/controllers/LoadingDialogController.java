@@ -1,5 +1,9 @@
 package de.br0tbox.gitfx.ui.controllers;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -22,8 +26,17 @@ public class LoadingDialogController extends AbstractController {
 		this.progressMonitor = progressMonitor;
 		progressBar.progressProperty().bind(progressMonitor.getProgressProperty());
 		tasktitle.textProperty().bind(progressMonitor.getTitleProperty());
+		progressMonitor.getCanceledProperty().bind(canceled);
+		cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				canceled.set(true);
+			}
+		});
 	}
 
+	private BooleanProperty canceled = new SimpleBooleanProperty(false);
 	@FXML
 	Button cancelButton;
 	@FXML
