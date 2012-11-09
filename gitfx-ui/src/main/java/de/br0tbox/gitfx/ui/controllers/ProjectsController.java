@@ -35,8 +35,8 @@ import de.br0tbox.gitfx.core.model.GitFxProject;
 import de.br0tbox.gitfx.core.model.PersistentProject;
 import de.br0tbox.gitfx.core.services.IProjectPersistentService;
 import de.br0tbox.gitfx.core.services.IPropertyService;
-import de.br0tbox.gitfx.ui.progress.GitFxProgressMonitor;
-import de.br0tbox.gitfx.ui.progress.GitFxTask;
+import de.br0tbox.gitfx.ui.progress.GitCloneTask;
+import de.br0tbox.gitfx.ui.progress.GitTaskFactory;
 import de.br0tbox.gitfx.ui.uimodel.GitRefreshTimerTask;
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 
@@ -105,11 +105,9 @@ public class ProjectsController extends AbstractController {
 		if (gitDir != null) {
 			gitDir.delete();
 			gitDir.mkdirs();
-			final CloneCommand cloneRepository = Git.cloneRepository();
-			cloneRepository.setDirectory(gitDir).setURI("https://github.com/VanillaDev/Vanilla.git");
-			final GitFxProgressMonitor fxProgressMonitor = new GitFxProgressMonitor();
-			cloneRepository.setProgressMonitor(fxProgressMonitor);
-			final GitFxTask fxTask = new GitFxTask(cloneRepository, fxProgressMonitor);
+			final CloneCommand cloneCommand = Git.cloneRepository();
+			cloneCommand.setDirectory(gitDir).setURI("https://github.com/VanillaDev/Vanilla.git");
+			final GitCloneTask fxTask = GitTaskFactory.cloneTask(cloneCommand);
 			runGitTaskWithProgressDialog(fxTask);
 			addProject(new File(gitDir, ".git"), gitDir.getName(), false);
 		}
