@@ -1,5 +1,7 @@
 package de.br0tbox.gitfx.ui.controllers;
 
+import static de.br0tbox.gitfx.core.util.Preconditions.checkNotNull;
+
 import java.util.Set;
 
 import javafx.fxml.FXML;
@@ -20,9 +22,7 @@ public class CommitDialogController extends AbstractController {
 
 	@Override
 	protected void onInit() {
-		if (projectModel == null) {
-			throw new IllegalArgumentException("projectModel must not be null");
-		}
+		checkNotNull(projectModel, "projectModel");
 		final Set<String> allUncommitedChanges = projectModel.getFxProject().getAllUncommitedChanges();
 		unstagedFiles.getItems().addAll(allUncommitedChanges);
 	}

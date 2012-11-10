@@ -32,11 +32,15 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.events.IndexChangedEvent;
 import org.eclipse.jgit.events.IndexChangedListener;
 import org.eclipse.jgit.events.ListenerHandle;
@@ -57,6 +61,7 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 import com.cathive.fx.guice.FXMLController;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
 
+import de.br0tbox.gitfx.core.util.Preconditions;
 import de.br0tbox.gitfx.ui.fx.ChangedFileListCell;
 import de.br0tbox.gitfx.ui.history.CommitTableCell;
 import de.br0tbox.gitfx.ui.history.JavaFxCommitList;
@@ -69,6 +74,7 @@ public class SingleProjectController extends AbstractController {
 
 	static final Image IMAGE_COMMIT_CLEAN = new Image(ChangedFileListCell.class.getResourceAsStream("/icons/accept.png"));
 	static final Image IMAGE_COMMIT_DIRTY = new Image(ChangedFileListCell.class.getResourceAsStream("/icons/asterisk_yellow.png"));
+	private static final Logger LOGGER = LogManager.getLogger(SingleProjectController.class);
 
 	private ProjectModel projectModel;
 	@FXML
@@ -128,8 +134,7 @@ public class SingleProjectController extends AbstractController {
 			commitController.init(stage);
 			stage.showAndWait();
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("Error while openening commit dialog.", e);
 		}
 	}
 
@@ -179,55 +184,62 @@ public class SingleProjectController extends AbstractController {
 	private void modelToView() {
 		getStage().setTitle(projectModel.getProjectName() + " (" + projectModel.getCurrentBranch() + ") - GitFx");
 		getStage().getIcons().add(new Image(SingleProjectController.class.getResourceAsStream("/icons/package.png")));
-		// final LogCommand log = projectModel.getFxProject().getGit().log();
-		// Commits
 		tableView.getItems().clear();
-		// tableView.setItems(projectModel.getCommits());
 		try {
-			final Repository repository = projectModel.getFxProject().getGit().getRepository();
-			final RevWalk revWalk = new PlotWalk(repository);
-			revWalk.markStart(revWalk.parseCommit(repository.getRef("master").getObjectId()));
-			final JavaFxCommitList commitList = new JavaFxCommitList();
-			commitList.source(revWalk);
-			commitList.fillTo(512);
-			PlotCommit<?>[] array = new PlotCommit[commitList.size()];
-			array = commitList.toArray(array);
-			final List<GitFxCommit> commits = new ArrayList<>(array.length);
-			for (final PlotCommit<?> commit : array) {
-				final GitFxCommit gitFxCommit = new GitFxCommit(commit.abbreviate(7).name(), commit.getAuthorIdent().getName(), commit.getShortMessage(), commit);
-				commits.add(gitFxCommit);
-			}
-			final JavaFxPlotRenderer renderer = new JavaFxPlotRenderer();
-			final TableColumn<GitFxCommit, GitFxCommit> tableColumn = (TableColumn<GitFxCommit, GitFxCommit>) tableView.getColumns().get(0);
-			tableColumn.setCellFactory(new Callback<TableColumn<GitFxCommit, GitFxCommit>, TableCell<GitFxCommit, GitFxCommit>>() {
-
-				@Override
-				public TableCell<GitFxCommit, GitFxCommit> call(TableColumn<GitFxCommit, GitFxCommit> arg0) {
-					final CommitTableCell<GitFxCommit> commitTableCell = new CommitTableCell<>(renderer);
-					return commitTableCell;
-				}
-			});
-			tableColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GitFxCommit, GitFxCommit>, ObservableValue<GitFxCommit>>() {
-
-				@Override
-				public ObservableValue<GitFxCommit> call(final CellDataFeatures<GitFxCommit, GitFxCommit> dataFeatures) {
-					return new ObservableValueBase<GitFxCommit>() {
-
-						@Override
-						public GitFxCommit getValue() {
-							return dataFeatures.getValue();
-						}
-					};
-				}
-			});
-			tableView.getItems().addAll(commits);
-			revWalk.release();
-			// Branches
+			addCommitLogToView();
 			addBranchesToView();
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("Error while creating log view.", e);
 		}
+	}
+
+	private void addCommitLogToView() throws MissingObjectException, IncorrectObjectTypeException, IOException {
+		final Repository repository = projectModel.getFxProject().getGit().getRepository();
+		final RevWalk revWalk = new PlotWalk(repository);
+		revWalk.markStart(revWalk.parseCommit(repository.getRef("master").getObjectId()));
+		final JavaFxCommitList commitList = new JavaFxCommitList();
+		commitList.source(revWalk);
+		commitList.fillTo(512);
+		PlotCommit<?>[] array = new PlotCommit[commitList.size()];
+		array = commitList.toArray(array);
+		final List<GitFxCommit> commits = new ArrayList<>(array.length);
+		for (final PlotCommit<?> commit : array) {
+			final GitFxCommit gitFxCommit = new GitFxCommit(commit.abbreviate(7).name(), commit.getAuthorIdent().getName(), commit.getShortMessage(), commit);
+			commits.add(gitFxCommit);
+		}
+		final JavaFxPlotRenderer renderer = new JavaFxPlotRenderer();
+		final TableColumn<GitFxCommit, GitFxCommit> tableColumn = (TableColumn<GitFxCommit, GitFxCommit>) tableView.getColumns().get(0);
+		tableColumn.setCellFactory(createCommitCellFactory(renderer));
+		tableColumn.setCellValueFactory(createCellValueFactory());
+		tableView.getItems().addAll(commits);
+		revWalk.release();
+	}
+
+	private Callback<CellDataFeatures<GitFxCommit, GitFxCommit>, ObservableValue<GitFxCommit>> createCellValueFactory() {
+		return new Callback<TableColumn.CellDataFeatures<GitFxCommit, GitFxCommit>, ObservableValue<GitFxCommit>>() {
+
+			@Override
+			public ObservableValue<GitFxCommit> call(final CellDataFeatures<GitFxCommit, GitFxCommit> dataFeatures) {
+				return new ObservableValueBase<GitFxCommit>() {
+
+					@Override
+					public GitFxCommit getValue() {
+						return dataFeatures.getValue();
+					}
+				};
+			}
+		};
+	}
+
+	private Callback<TableColumn<GitFxCommit, GitFxCommit>, TableCell<GitFxCommit, GitFxCommit>> createCommitCellFactory(final JavaFxPlotRenderer renderer) {
+		return new Callback<TableColumn<GitFxCommit, GitFxCommit>, TableCell<GitFxCommit, GitFxCommit>>() {
+
+			@Override
+			public TableCell<GitFxCommit, GitFxCommit> call(TableColumn<GitFxCommit, GitFxCommit> arg0) {
+				final CommitTableCell<GitFxCommit> commitTableCell = new CommitTableCell<>(renderer);
+				return commitTableCell;
+			}
+		};
 	}
 
 	private void addBranchesToView() throws IOException {
@@ -293,6 +305,7 @@ public class SingleProjectController extends AbstractController {
 	}
 
 	private void showHistoryForCommit(final GitFxCommit selectedCommit) {
+		Preconditions.checkNotNull(selectedCommit, "selectedCommit");
 		final Git git = projectModel.getFxProject().getGit();
 		final Repository repository = git.getRepository();
 		ObjectId resolve;
@@ -327,8 +340,7 @@ public class SingleProjectController extends AbstractController {
 			revWalk.release();
 			df.release();
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("Error while showing changes for commit " + selectedCommit.getHash(), e);
 		}
 	}
 

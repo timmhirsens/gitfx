@@ -68,10 +68,7 @@ public abstract class AbstractController {
 			task.setOnCancelled(closeDialogEventHandler);
 			task.setOnFailed(closeDialogEventHandler);
 			controller.setTask(task);
-			//			getExecutorService().submit(task);
-			final Thread thread = new Thread(task);
-			thread.setName("Gittask");
-			thread.start();
+			getExecutorService().submit(task);
 			controller.show();
 		} catch (final IOException e) {
 			e.printStackTrace();
