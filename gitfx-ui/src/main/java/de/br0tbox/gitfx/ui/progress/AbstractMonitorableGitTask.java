@@ -6,6 +6,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.api.GitCommand;
 import org.eclipse.jgit.lib.ProgressMonitor;
 
 /**
@@ -14,14 +17,18 @@ import org.eclipse.jgit.lib.ProgressMonitor;
  */
 public abstract class AbstractMonitorableGitTask<V> extends Task<V> {
 
+	private static final Logger LOGGER = LogManager.getLogger(AbstractMonitorableGitTask.class);
+
 	private BooleanProperty canceledProperty = new SimpleBooleanProperty(false);
 	private boolean canceled;
+	protected GitCommand<V> gitCommand;
 
 	public boolean isCanceled() {
 		return canceled;
 	}
 
-	protected AbstractMonitorableGitTask() {
+	protected AbstractMonitorableGitTask(GitCommand<V> gitCommand) {
+		this.gitCommand = gitCommand;
 		canceledProperty.addListener(new ChangeListener<Boolean>() {
 
 			@Override
@@ -29,6 +36,28 @@ public abstract class AbstractMonitorableGitTask<V> extends Task<V> {
 				canceled = newValue;
 			}
 		});
+	}
+
+	@Override
+	protected V call() throws Exception {
+		try {
+			onBeforeCall();
+			final V returnValue = gitCommand.call();
+			onAfterCall(returnValue);
+			return returnValue;
+		} catch (final Throwable t) {
+			LOGGER.error("Error while perfoming Task " + gitCommand.toString(), t);
+			t.printStackTrace();
+			throw t;
+		}
+	}
+
+	protected void onAfterCall(V returnValue) {
+		// design for extension
+	}
+
+	protected void onBeforeCall() {
+		// design for extension
 	}
 
 	protected ProgressMonitor createProgressMonitor() {

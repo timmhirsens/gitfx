@@ -63,12 +63,15 @@ public abstract class AbstractController {
 		try {
 			load = fxmlLoader.load(AbstractController.class.getResource("/LoadingDialogView.fxml"));
 			final LoadingDialogController controller = load.getController();
-			final EventHandler<WorkerStateEvent> closeDialogEventHandler = createEventHandler(controller, task);
+			final EventHandler<WorkerStateEvent> closeDialogEventHandler = createEventHandler(controller);
 			task.setOnSucceeded(closeDialogEventHandler);
 			task.setOnCancelled(closeDialogEventHandler);
 			task.setOnFailed(closeDialogEventHandler);
 			controller.setTask(task);
-			getExecutorService().submit(task);
+			//			getExecutorService().submit(task);
+			final Thread thread = new Thread(task);
+			thread.setName("Gittask");
+			thread.start();
 			controller.show();
 		} catch (final IOException e) {
 			e.printStackTrace();
@@ -76,12 +79,12 @@ public abstract class AbstractController {
 
 	}
 
-	private EventHandler<WorkerStateEvent> createEventHandler(final LoadingDialogController controller, final AbstractMonitorableGitTask<?> task) {
+	private EventHandler<WorkerStateEvent> createEventHandler(final LoadingDialogController controller) {
 		return new EventHandler<WorkerStateEvent>() {
 
 			@Override
 			public void handle(WorkerStateEvent event) {
-				System.out.println(task.getState());
+				System.out.println(event.getSource().getState());
 				Platform.runLater(new Runnable() {
 
 					@Override

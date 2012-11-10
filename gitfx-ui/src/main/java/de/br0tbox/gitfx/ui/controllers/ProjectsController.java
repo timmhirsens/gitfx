@@ -106,7 +106,7 @@ public class ProjectsController extends AbstractController {
 			gitDir.delete();
 			gitDir.mkdirs();
 			final CloneCommand cloneCommand = Git.cloneRepository();
-			cloneCommand.setDirectory(gitDir).setURI("https://github.com/VanillaDev/Vanilla.git");
+			cloneCommand.setDirectory(gitDir).setURI("git@github.com:fr1zle/Vanilla.git");
 			final GitCloneTask fxTask = GitTaskFactory.cloneTask(cloneCommand);
 			runGitTaskWithProgressDialog(fxTask);
 			addProject(new File(gitDir, ".git"), gitDir.getName(), false);

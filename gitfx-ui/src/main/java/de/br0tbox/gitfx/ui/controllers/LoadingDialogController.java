@@ -26,10 +26,10 @@ public class LoadingDialogController extends AbstractController {
 	public void setTask(AbstractMonitorableGitTask<?> task) {
 		this.task = task;
 		progressBar.progressProperty().bind(task.progressProperty());
-		//		currentTaskBar.progressProperty().bind(task.getCurrentTaskProgress());
 		tasktitle.textProperty().bind(task.messageProperty());
 		task.getCanceledProperty().bind(canceled);
 		cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+
 			@Override
 			public void handle(ActionEvent arg0) {
 				canceled.set(true);

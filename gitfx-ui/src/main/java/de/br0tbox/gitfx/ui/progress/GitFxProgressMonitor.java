@@ -36,9 +36,11 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 			gitTask.updateProgress(0, 0);
 			gitTask.updateMessage(currentTaskTitle + "...");
 		} else {
-			currentTaskDone += completed;
-			gitTask.updateMessage(currentTaskTitle + " (" + currentTaskDone + " of " + currentTaskTotalWork + ")");
-			gitTask.updateProgress(currentTaskDone, currentTaskTotalWork);
+			if (completed / 10 == 0) {
+				currentTaskDone += completed;
+				gitTask.updateMessage(currentTaskTitle + " (" + currentTaskDone + " of " + currentTaskTotalWork + ")");
+				gitTask.updateProgress(currentTaskDone, currentTaskTotalWork);
+			}
 		}
 	}
 
@@ -50,7 +52,8 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 
 	@Override
 	public boolean isCancelled() {
-		return gitTask.isCanceled();
+		final boolean canceled = gitTask.isCanceled();
+		return canceled;
 	}
 
 }
