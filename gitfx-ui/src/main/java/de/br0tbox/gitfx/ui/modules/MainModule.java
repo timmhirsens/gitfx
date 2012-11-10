@@ -10,6 +10,8 @@ import de.br0tbox.gitfx.core.services.impl.SimpleLocalPropertyService;
 import de.br0tbox.gitfx.core.services.impl.YamlProjectPersistentService;
 import de.br0tbox.gitfx.ui.shutdown.IShutdownHook;
 import de.br0tbox.gitfx.ui.shutdown.TestShutDownHook;
+import de.br0tbox.gitfx.ui.sync.IRepositorySyncService;
+import de.br0tbox.gitfx.ui.sync.RepositorySyncService;
 
 public class MainModule extends AbstractModule {
 
@@ -19,6 +21,7 @@ public class MainModule extends AbstractModule {
 		multibinder.addBinding().toInstance(new TestShutDownHook());
 		bind(IPropertyService.class).to(SimpleLocalPropertyService.class).in(Singleton.class);
 		bind(IProjectPersistentService.class).to(YamlProjectPersistentService.class).in(Singleton.class);
+		bind(IRepositorySyncService.class).to(RepositorySyncService.class).in(Singleton.class);
 	}
 
 }

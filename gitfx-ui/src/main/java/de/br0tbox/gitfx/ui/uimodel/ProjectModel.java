@@ -1,5 +1,6 @@
 package de.br0tbox.gitfx.ui.uimodel;
 
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -12,7 +13,11 @@ public class ProjectModel {
 	private SimpleStringProperty projectNameProperty = new SimpleStringProperty("");
 	private SimpleStringProperty currentBranchProperty = new SimpleStringProperty("");
 	private SimpleStringProperty pathProperty = new SimpleStringProperty("");
+	private IntegerProperty uncommitedChanges = new SimpleIntegerProperty();
 	private ObservableList<GitFxCommit> commitsProperty = FXCollections.observableArrayList();
+	private ObservableList<String> localBranchesProperty = FXCollections.observableArrayList();
+	private ObservableList<String> tagsProperty = FXCollections.observableArrayList();
+	private ObservableList<String> remoteBranchesProperty = FXCollections.observableArrayList();
 	private GitFxProject fxProject;
 
 	public ObservableList<GitFxCommit> getCommits() {
@@ -84,4 +89,19 @@ public class ProjectModel {
 		return commitsProperty;
 	}
 
+	public ObservableList<String> getLocalBranchesProperty() {
+		return localBranchesProperty;
+	}
+
+	public ObservableList<String> getTagsProperty() {
+		return tagsProperty;
+	}
+
+	public ObservableList<String> getRemoteBranchesProperty() {
+		return remoteBranchesProperty;
+	}
+
+	public IntegerProperty getUncommitedChanges() {
+		return uncommitedChanges;
+	}
 }

@@ -2,11 +2,7 @@ package de.br0tbox.gitfx.ui.controllers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -37,7 +33,7 @@ import de.br0tbox.gitfx.core.services.IProjectPersistentService;
 import de.br0tbox.gitfx.core.services.IPropertyService;
 import de.br0tbox.gitfx.ui.progress.GitCloneTask;
 import de.br0tbox.gitfx.ui.progress.GitTaskFactory;
-import de.br0tbox.gitfx.ui.uimodel.GitRefreshTimerTask;
+import de.br0tbox.gitfx.ui.sync.IRepositorySyncService;
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 
 /**
@@ -52,12 +48,12 @@ public class ProjectsController extends AbstractController {
 
 	private static final Logger LOGGER = LogManager.getLogger(ProjectsController.class);
 
-	private final Map<ProjectModel, TimerTask> refreshTimers = new HashMap<>();
-
 	@Inject
 	private IPropertyService propertyService;
 	@Inject
 	private IProjectPersistentService projectPersistentService;
+	@Inject
+	private IRepositorySyncService repositorySyncService;
 
 	private File lastOpened = null;
 
@@ -119,11 +115,7 @@ public class ProjectsController extends AbstractController {
 		projectList.getItems().remove(selectedItem);
 		selectedItem.getFxProject().getGit().getRepository().close();
 		projectPersistentService.delete(new PersistentProject(selectedItem.getPath(), selectedItem.getProjectName()));
-		final TimerTask timerTask = refreshTimers.get(selectedItem);
-		if (timerTask != null) {
-			timerTask.cancel();
-			refreshTimers.remove(selectedItem);
-		}
+		repositorySyncService.stopWatchingRepository(selectedItem);
 	}
 
 	private void loadProjects() {
@@ -135,13 +127,6 @@ public class ProjectsController extends AbstractController {
 				addProject(new File(path), name, true);
 			}
 		}
-	}
-
-	private void startTimer(final ProjectModel projectModel) {
-		final TimerTask task = new GitRefreshTimerTask(projectModel);
-		final Timer timer = new Timer(true);
-		timer.scheduleAtFixedRate(task, 0, 4000);
-		refreshTimers.put(projectModel, task);
 	}
 
 	private void openSelectedProject() {
@@ -178,7 +163,7 @@ public class ProjectsController extends AbstractController {
 			projectModel.setCurrentBranch(gitFxProject.getGit().getRepository().getBranch());
 			projectModel.setChanges(gitFxProject.getUncommitedChangesNumber());
 			projectModel.setPath(file.getAbsolutePath());
-			startTimer(projectModel);
+			repositorySyncService.startWatchingRepository(projectModel);
 			projectList.getItems().add(projectModel);
 			if (!fromFile) {
 				projectPersistentService.save(new PersistentProject(projectModel.getPath(), projectModel.getProjectName()));

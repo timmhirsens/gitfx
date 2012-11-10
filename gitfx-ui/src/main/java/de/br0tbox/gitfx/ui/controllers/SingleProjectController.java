@@ -2,13 +2,12 @@ package de.br0tbox.gitfx.ui.controllers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.ObservableValueBase;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -48,10 +47,7 @@ import org.eclipse.jgit.events.RefsChangedEvent;
 import org.eclipse.jgit.events.RefsChangedListener;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revplot.PlotCommit;
-import org.eclipse.jgit.revplot.PlotWalk;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
@@ -64,7 +60,6 @@ import com.cathive.fx.guice.GuiceFXMLLoader.Result;
 import de.br0tbox.gitfx.core.util.Preconditions;
 import de.br0tbox.gitfx.ui.fx.ChangedFileListCell;
 import de.br0tbox.gitfx.ui.history.CommitTableCell;
-import de.br0tbox.gitfx.ui.history.JavaFxCommitList;
 import de.br0tbox.gitfx.ui.history.JavaFxPlotRenderer;
 import de.br0tbox.gitfx.ui.uimodel.GitFxCommit;
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
@@ -120,6 +115,42 @@ public class SingleProjectController extends AbstractController {
 			}
 		});
 		addUncommitedChangesListener();
+		addCommitsListener();
+		addBranchesListener();
+	}
+
+	private void addBranchesListener() {
+		final ListChangeListener<String> branchesChangesListener = new ListChangeListener<String>() {
+
+			@Override
+			public void onChanged(Change<? extends String> change) {
+				addBranchesToView();
+			}
+		};
+		projectModel.getCurrentBranchProperty().addListener(new ChangeListener<String>() {
+
+			@Override
+			public void changed(ObservableValue<? extends String> arg0, String oldValue, String newValue) {
+				getStage().setTitle(projectModel.getProjectName() + " (" + projectModel.getCurrentBranch() + ") - GitFx");
+			}
+		});
+		projectModel.getLocalBranchesProperty().addListener(branchesChangesListener);
+		projectModel.getRemoteBranchesProperty().addListener(branchesChangesListener);
+		projectModel.getTagsProperty().addListener(branchesChangesListener);
+	}
+
+	private void addCommitsListener() {
+		projectModel.getCommitsProperty().addListener(new ListChangeListener<GitFxCommit>() {
+
+			@Override
+			public void onChanged(javafx.collections.ListChangeListener.Change<? extends GitFxCommit> change) {
+				try {
+					addCommitsLogToView();
+				} catch (final IOException e) {
+					LOGGER.error("Error while refreshing Commits", e);
+				}
+			}
+		});
 	}
 
 	public void commitButtonClicked() {
@@ -186,33 +217,21 @@ public class SingleProjectController extends AbstractController {
 		getStage().getIcons().add(new Image(SingleProjectController.class.getResourceAsStream("/icons/package.png")));
 		tableView.getItems().clear();
 		try {
-			addCommitLogToView();
+			addCommitsLogToView();
 			addBranchesToView();
 		} catch (final IOException e) {
 			LOGGER.error("Error while creating log view.", e);
 		}
 	}
 
-	private void addCommitLogToView() throws MissingObjectException, IncorrectObjectTypeException, IOException {
-		final Repository repository = projectModel.getFxProject().getGit().getRepository();
-		final RevWalk revWalk = new PlotWalk(repository);
-		revWalk.markStart(revWalk.parseCommit(repository.getRef("master").getObjectId()));
-		final JavaFxCommitList commitList = new JavaFxCommitList();
-		commitList.source(revWalk);
-		commitList.fillTo(512);
-		PlotCommit<?>[] array = new PlotCommit[commitList.size()];
-		array = commitList.toArray(array);
-		final List<GitFxCommit> commits = new ArrayList<>(array.length);
-		for (final PlotCommit<?> commit : array) {
-			final GitFxCommit gitFxCommit = new GitFxCommit(commit.abbreviate(7).name(), commit.getAuthorIdent().getName(), commit.getShortMessage(), commit);
-			commits.add(gitFxCommit);
-		}
+	private void addCommitsLogToView() throws MissingObjectException, IncorrectObjectTypeException, IOException {
+		tableView.getItems().clear();
+		final ObservableList<GitFxCommit> commits = projectModel.getCommitsProperty();
 		final JavaFxPlotRenderer renderer = new JavaFxPlotRenderer();
 		final TableColumn<GitFxCommit, GitFxCommit> tableColumn = (TableColumn<GitFxCommit, GitFxCommit>) tableView.getColumns().get(0);
 		tableColumn.setCellFactory(createCommitCellFactory(renderer));
 		tableColumn.setCellValueFactory(createCellValueFactory());
 		tableView.getItems().addAll(commits);
-		revWalk.release();
 	}
 
 	private Callback<CellDataFeatures<GitFxCommit, GitFxCommit>, ObservableValue<GitFxCommit>> createCellValueFactory() {
@@ -242,41 +261,14 @@ public class SingleProjectController extends AbstractController {
 		};
 	}
 
-	private void addBranchesToView() throws IOException {
+	private void addBranchesToView() {
 		treeView.showRootProperty().set(false);
-		final List<String> remoteList = new ArrayList<>();
-		final List<String> tagsList = new ArrayList<>();
-		final List<String> localList = new ArrayList<>();
-		final Repository repository = projectModel.getFxProject().getGit().getRepository();
-		final Map<String, Ref> remotes = repository.getRefDatabase().getRefs(Constants.R_REMOTES);
-		final Iterator<String> remotesIterator = remotes.keySet().iterator();
-		while (remotesIterator.hasNext()) {
-			final String remotekey = remotesIterator.next();
-			final Ref remote = remotes.get(remotekey);
-			remoteList.add(remote.getName());
-		}
-		final Map<String, Ref> tags = repository.getRefDatabase().getRefs(Constants.R_TAGS);
-		final Iterator<String> tagsIterator = tags.keySet().iterator();
-		while (tagsIterator.hasNext()) {
-			final String tagkey = tagsIterator.next();
-			final Ref tag = tags.get(tagkey);
-			tagsList.add(tag.getName());
-		}
-		final Map<String, Ref> all = repository.getRefDatabase().getRefs(Constants.R_REFS);
-		final Iterator<String> allIterator = all.keySet().iterator();
-		while (allIterator.hasNext()) {
-			final String allKey = allIterator.next();
-			final Ref allRef = all.get(allKey);
-			if (allRef != null) {
-				final String name = allRef.getName();
-				if (!remoteList.contains(name) && !tagsList.contains(name)) {
-					localList.add(name);
-				}
-			}
-		}
 		branchesItem.getChildren().clear();
 		remotesItem.getChildren().clear();
 		tagsItem.getChildren().clear();
+		final List<String> localList = projectModel.getLocalBranchesProperty();
+		final List<String> remoteList = projectModel.getRemoteBranchesProperty();
+		final List<String> tagsList = projectModel.getTagsProperty();
 		for (String local : localList) {
 			if (local.startsWith(Constants.R_HEADS)) {
 				local = local.substring(Constants.R_HEADS.length(), local.length());
