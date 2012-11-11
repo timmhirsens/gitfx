@@ -40,11 +40,7 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
-import org.eclipse.jgit.events.IndexChangedEvent;
-import org.eclipse.jgit.events.IndexChangedListener;
 import org.eclipse.jgit.events.ListenerHandle;
-import org.eclipse.jgit.events.RefsChangedEvent;
-import org.eclipse.jgit.events.RefsChangedListener;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -102,7 +98,6 @@ public class SingleProjectController extends AbstractController {
 		listButton.setToggleGroup(toggleGroup);
 		modelToView();
 		addCommitClickedListener();
-		addProjectListeners();
 		setCommitButtonText(projectModel.getChanges());
 		getStage().setOnCloseRequest(new EventHandler<WindowEvent>() {
 			// Clean up listeners when project is closed.
@@ -178,25 +173,6 @@ public class SingleProjectController extends AbstractController {
 			}
 		};
 		projectModel.getChangesProperty().addListener(uncommitedChangesListener);
-	}
-
-	private void addProjectListeners() {
-		final ListenerHandle indexChangedListener = projectModel.getFxProject().getGit().getRepository().getListenerList().addIndexChangedListener(new IndexChangedListener() {
-
-			@Override
-			public void onIndexChanged(IndexChangedEvent event) {
-				modelToView();
-			}
-		});
-		final ListenerHandle refsChangedListener = projectModel.getFxProject().getGit().getRepository().getListenerList().addRefsChangedListener(new RefsChangedListener() {
-
-			@Override
-			public void onRefsChanged(RefsChangedEvent event) {
-				modelToView();
-			}
-		});
-		listenerHandles.add(indexChangedListener);
-		listenerHandles.add(refsChangedListener);
 	}
 
 	private void addCommitClickedListener() {
