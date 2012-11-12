@@ -1,7 +1,9 @@
 package de.br0tbox.gitfx.ui.uimodel;
 
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,7 +20,19 @@ public class ProjectModel {
 	private ObservableList<String> localBranchesProperty = FXCollections.observableArrayList();
 	private ObservableList<String> tagsProperty = FXCollections.observableArrayList();
 	private ObservableList<String> remoteBranchesProperty = FXCollections.observableArrayList();
+	private ObservableList<String> stagedChanges = FXCollections.observableArrayList();
+	private ObservableList<String> unstagedChanges = FXCollections.observableArrayList();
+	private ListProperty<String> stagedChangesProperty = new SimpleListProperty<>();
+	private ListProperty<String> unstagedChangesProperty = new SimpleListProperty<>();
 	private GitFxProject fxProject;
+
+	public ListProperty<String> getStagedChangesProperty() {
+		return stagedChangesProperty;
+	}
+
+	public ListProperty<String> getUnstagedChangesProperty() {
+		return unstagedChangesProperty;
+	}
 
 	public ObservableList<GitFxCommit> getCommits() {
 		return commitsProperty;
@@ -29,6 +43,8 @@ public class ProjectModel {
 	}
 
 	public ProjectModel(GitFxProject fxProject) {
+		unstagedChangesProperty.setValue(unstagedChanges);
+		stagedChangesProperty.setValue(stagedChanges);
 		this.fxProject = fxProject;
 	}
 
@@ -104,4 +120,5 @@ public class ProjectModel {
 	public IntegerProperty getUncommitedChanges() {
 		return uncommitedChanges;
 	}
+
 }

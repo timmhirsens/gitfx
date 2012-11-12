@@ -9,8 +9,11 @@ import java.util.Map;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
+import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -34,9 +37,33 @@ public class SynchronizationTask extends Task<Void> {
 	protected Void call() throws Exception {
 		refreshCurrentBranch();
 		refreshUncommitedChangesNumber();
+		refreshIndex();
 		refreshBranches();
 		refreshCommits();
 		return null;
+	}
+
+	private void refreshIndex() throws NoWorkTreeException, GitAPIException {
+		final Status status = projectModel.getFxProject().getGit().status().call();
+		// not in index Changes
+		final List<String> unstagedChanges = new ArrayList<>();
+		unstagedChanges.addAll(status.getModified());
+		unstagedChanges.addAll(status.getMissing());
+		unstagedChanges.addAll(status.getUntracked());
+		final List<String> stagedChanges = new ArrayList<>();
+		stagedChanges.addAll(status.getAdded());
+		stagedChanges.addAll(status.getChanged());
+		stagedChanges.addAll(status.getRemoved());
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				projectModel.getUnstagedChangesProperty().getValue().clear();
+				projectModel.getStagedChangesProperty().getValue().clear();
+				projectModel.getUnstagedChangesProperty().getValue().addAll(unstagedChanges);
+				projectModel.getStagedChangesProperty().getValue().addAll(stagedChanges);
+			}
+		});
 	}
 
 	private void refreshUncommitedChangesNumber() {
