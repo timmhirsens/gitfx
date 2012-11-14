@@ -5,6 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
+<?language javascript?>
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="485.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml" fx:controller="de.br0tbox.gitfx.ui.controllers.CommitDialogController">
   <children>
@@ -21,8 +22,8 @@
                         <ListView fx:id="unstagedFiles" prefHeight="240.5" prefWidth="346.0" />
                         <ToolBar>
                           <items>
-                            <Button mnemonicParsing="false" text="Stage" />
-                            <Button mnemonicParsing="false" text="Stage All" />
+                            <Button mnemonicParsing="false" text="Stage" onAction="controller.stageSelected()" />
+                            <Button mnemonicParsing="false" text="Stage All" onAction="controller.stageAll()" />
                           </items>
                         </ToolBar>
                       </children>

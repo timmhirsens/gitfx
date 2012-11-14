@@ -77,19 +77,18 @@ public class GitFxApplication extends GuiceApplication {
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 
 			@Override
-			public void handle(WindowEvent arg0) {
-				Platform.exit();
+			public void handle(WindowEvent event) {
+				for (final IShutdownHook shutdownHook : shutdownHooks) {
+					if (!event.isConsumed()) {
+						shutdownHook.onShutdown(event);
+					}
+				}
+				if (!event.isConsumed()) {
+					Platform.exit();
+				}
 			}
 		});
 		LOGGER.debug("Startup finished");
-	}
-
-	@Override
-	public void stop() throws Exception {
-		for (final IShutdownHook shutdownHook : shutdownHooks) {
-			shutdownHook.onShutdown();
-		}
-		super.stop();
 	}
 
 }

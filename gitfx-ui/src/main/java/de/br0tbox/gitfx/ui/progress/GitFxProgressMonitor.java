@@ -36,11 +36,9 @@ public class GitFxProgressMonitor implements ProgressMonitor {
 			gitTask.updateProgress(0, 0);
 			gitTask.updateMessage(currentTaskTitle + "...");
 		} else {
-			if (completed / 10 == 0) {
-				currentTaskDone += completed;
-				gitTask.updateMessage(currentTaskTitle + " (" + currentTaskDone + " of " + currentTaskTotalWork + ")");
-				gitTask.updateProgress(currentTaskDone, currentTaskTotalWork);
-			}
+			currentTaskDone += completed;
+			gitTask.updateMessage(currentTaskTitle + " (" + currentTaskDone + " of " + currentTaskTotalWork + ")");
+			gitTask.updateProgress(currentTaskDone, currentTaskTotalWork);
 		}
 	}
 

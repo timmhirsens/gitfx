@@ -43,6 +43,10 @@
 			<artifactId>gitfx-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>javafx-dialogs</groupId>
+			<artifactId>javafx-dialogs</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
