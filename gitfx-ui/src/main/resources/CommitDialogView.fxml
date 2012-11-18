@@ -22,8 +22,8 @@
                         <ListView fx:id="unstagedFiles" prefHeight="240.5" prefWidth="346.0" />
                         <ToolBar>
                           <items>
-                            <Button mnemonicParsing="false" text="Stage" onAction="controller.stageSelected()" />
-                            <Button mnemonicParsing="false" text="Stage All" onAction="controller.stageAll()" />
+                            <Button mnemonicParsing="false" onAction="controller.stageSelected()" text="Stage" />
+                            <Button mnemonicParsing="false" onAction="controller.stageAll()" text="Stage All" />
                           </items>
                         </ToolBar>
                       </children>
@@ -43,11 +43,11 @@
           <children>
             <VBox prefHeight="359.0" prefWidth="237.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <children>
-                <TextArea prefHeight="454.0" prefWidth="344.0" wrapText="true" />
+                <TextArea fx:id="commitMessage" prefHeight="454.0" prefWidth="344.0" wrapText="true" />
                 <ToolBar>
                   <items>
                     <CheckBox mnemonicParsing="false" text="Sign-Off" />
-                    <Button mnemonicParsing="false" text="Commit" />
+                    <Button mnemonicParsing="false" onAction="controller.commit()" text="Commit" />
                   </items>
                 </ToolBar>
               </children>

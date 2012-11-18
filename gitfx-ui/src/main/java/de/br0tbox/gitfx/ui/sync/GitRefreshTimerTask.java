@@ -7,6 +7,7 @@ import javafx.application.Platform;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.events.IndexChangedEvent;
 import org.eclipse.jgit.lib.Repository;
 
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
@@ -31,6 +32,10 @@ public class GitRefreshTimerTask extends TimerTask {
 
 				@Override
 				public void run() {
+					final int changesInRepo = projectModel.getChangesProperty().get();
+					if (changesInRepo != uncommitedChangesNumber) {
+						projectModel.getFxProject().getGit().getRepository().getListenerList().dispatch(new IndexChangedEvent());
+					}
 					projectModel.getChangesProperty().set(uncommitedChangesNumber);
 				}
 			});

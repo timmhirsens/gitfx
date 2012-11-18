@@ -9,6 +9,8 @@ import java.util.Map;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
@@ -27,6 +29,8 @@ import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 
 public class SynchronizationTask extends Task<Void> {
 
+	private static final Logger LOGGER = LogManager.getLogger(SynchronizationTask.class);
+
 	private ProjectModel projectModel;
 
 	public SynchronizationTask(ProjectModel model) {
@@ -35,6 +39,7 @@ public class SynchronizationTask extends Task<Void> {
 
 	@Override
 	protected Void call() throws Exception {
+		LOGGER.debug("Refreshing git repository");
 		refreshCurrentBranch();
 		refreshUncommitedChangesNumber();
 		refreshIndex();

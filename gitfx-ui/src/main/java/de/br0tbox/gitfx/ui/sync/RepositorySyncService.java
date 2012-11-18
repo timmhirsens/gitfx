@@ -1,7 +1,9 @@
 package de.br0tbox.gitfx.ui.sync;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -19,14 +21,21 @@ public class RepositorySyncService implements IRepositorySyncService {
 
 	private Set<ProjectModel> projectModels = new HashSet<>();
 	private Map<ProjectModel, TimerTask> refreshTimers = new HashMap<>();
+	private Map<ProjectModel, List<ListenerHandle>> listenerHandles = new HashMap<>();
 
 	@Override
 	public void startWatchingRepository(final ProjectModel projectModel) {
 		startTimer(projectModel);
+		List<ListenerHandle> handleList = listenerHandles.get(projectModel);
+		if (handleList == null) {
+			handleList = new ArrayList<>();
+			listenerHandles.put(projectModel, handleList);
+		}
 		final ListenerHandle indexChangedHandle = projectModel.getFxProject().getGit().getRepository().getListenerList().addIndexChangedListener(new IndexChangedListener() {
 
 			@Override
 			public void onIndexChanged(IndexChangedEvent event) {
+				System.out.println("Index Change");
 				startTask(projectModel);
 			}
 		});
@@ -34,14 +43,23 @@ public class RepositorySyncService implements IRepositorySyncService {
 
 			@Override
 			public void onRefsChanged(RefsChangedEvent event) {
+				System.out.println("Refs Change");
 				startTask(projectModel);
 			}
 		});
+		handleList.add(refsChangedHandle);
+		handleList.add(indexChangedHandle);
 		projectModels.add(projectModel);
 	}
 
 	@Override
 	public void stopWatchingRepository(ProjectModel projectModel) {
+		final List<ListenerHandle> list = listenerHandles.get(projectModel);
+		if (list != null) {
+			for (final ListenerHandle handle : list) {
+				handle.remove();
+			}
+		}
 		stopTimer(projectModel);
 		projectModels.remove(projectModel);
 	}
