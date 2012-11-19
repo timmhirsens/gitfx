@@ -10,6 +10,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Platform;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.Dialogs;
+import javafx.scene.control.Dialogs.DialogOptions;
+import javafx.scene.control.Dialogs.DialogResponse;
 import javafx.stage.Stage;
 
 import javax.inject.Inject;
@@ -17,11 +20,14 @@ import javax.inject.Inject;
 import com.cathive.fx.guice.GuiceFXMLLoader;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
 
+import de.br0tbox.gitfx.ui.message.Message;
+import de.br0tbox.gitfx.ui.message.MessageBundle;
 import de.br0tbox.gitfx.ui.progress.AbstractMonitorableGitTask;
 
 public abstract class AbstractController {
 
 	private static ThreadPoolExecutor executorService;
+	private MessageBundle messageBundle = new MessageBundle();
 
 	public static ThreadPoolExecutor getExecutorService() {
 		if (executorService == null) {
@@ -91,5 +97,27 @@ public abstract class AbstractController {
 				});
 			}
 		};
+	}
+
+	protected DialogResponse showErrorMessage(String code, Throwable throwable, String... parameters) {
+		final Message message = messageBundle.getMessage(code, parameters);
+		return Dialogs.showErrorDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel());
+	}
+
+	protected DialogResponse showMessage(String code, String... parameters) {
+		final Message message = messageBundle.getMessage(code, parameters);
+		switch (message.getType()) {
+		case ERROR:
+			return Dialogs.showErrorDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel());
+		case CONFIRMATION:
+			return Dialogs.showConfirmDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel(), DialogOptions.YES_NO_CANCEL);
+		case INFO:
+			Dialogs.showInformationDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel());
+			return null;
+		case WARNING:
+			return Dialogs.showWarningDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel());
+		default:
+			throw new UnsupportedOperationException();
+		}
 	}
 }

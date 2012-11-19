@@ -35,6 +35,9 @@ public class CommitDialogController extends AbstractController {
 	@FXML
 	public void stageSelected() {
 		try {
+			if (unstagedFiles.getSelectionModel().getSelectedItems().size() < 1) {
+				return;
+			}
 			final AddCommand add = projectModel.getFxProject().getGit().add();
 			add.setUpdate(true);
 			final List<String> selectedItems = unstagedFiles.getSelectionModel().getSelectedItems();

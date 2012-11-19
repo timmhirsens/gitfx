@@ -35,7 +35,6 @@ public class RepositorySyncService implements IRepositorySyncService {
 
 			@Override
 			public void onIndexChanged(IndexChangedEvent event) {
-				System.out.println("Index Change");
 				startTask(projectModel);
 			}
 		});
@@ -43,7 +42,6 @@ public class RepositorySyncService implements IRepositorySyncService {
 
 			@Override
 			public void onRefsChanged(RefsChangedEvent event) {
-				System.out.println("Refs Change");
 				startTask(projectModel);
 			}
 		});

@@ -19,7 +19,6 @@ import javax.inject.Inject;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -31,8 +30,6 @@ import de.br0tbox.gitfx.core.model.GitFxProject;
 import de.br0tbox.gitfx.core.model.PersistentProject;
 import de.br0tbox.gitfx.core.services.IProjectPersistentService;
 import de.br0tbox.gitfx.core.services.IPropertyService;
-import de.br0tbox.gitfx.ui.progress.GitCloneTask;
-import de.br0tbox.gitfx.ui.progress.GitTaskFactory;
 import de.br0tbox.gitfx.ui.sync.IRepositorySyncService;
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 
@@ -97,16 +94,17 @@ public class ProjectsController extends AbstractController {
 
 	@FXML
 	public void cloneButtonClicked() {
-		final File gitDir = openDirectoryChooserAtLastOpened();
-		if (gitDir != null) {
-			gitDir.delete();
-			gitDir.mkdirs();
-			final CloneCommand cloneCommand = Git.cloneRepository();
-			cloneCommand.setDirectory(gitDir).setURI("git@github.com:fr1zle/Vanilla.git");
-			final GitCloneTask fxTask = GitTaskFactory.cloneTask(cloneCommand);
-			runGitTaskWithProgressDialog(fxTask);
-			addProject(new File(gitDir, ".git"), gitDir.getName(), false);
-		}
+		showMessage("00001");
+		//		final File gitDir = openDirectoryChooserAtLastOpened();
+		//		if (gitDir != null) {
+		//			gitDir.delete();
+		//			gitDir.mkdirs();
+		//			final CloneCommand cloneCommand = Git.cloneRepository();
+		//			cloneCommand.setDirectory(gitDir).setURI("git@github.com:fr1zle/Vanilla.git");
+		//			final GitCloneTask fxTask = GitTaskFactory.cloneTask(cloneCommand);
+		//			runGitTaskWithProgressDialog(fxTask);
+		//			addProject(new File(gitDir, ".git"), gitDir.getName(), false);
+		//		}
 	}
 
 	@FXML
