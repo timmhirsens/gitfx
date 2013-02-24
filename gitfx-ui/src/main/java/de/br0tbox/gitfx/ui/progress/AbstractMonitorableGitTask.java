@@ -47,7 +47,6 @@ public abstract class AbstractMonitorableGitTask<V> extends Task<V> {
 			return returnValue;
 		} catch (final Throwable t) {
 			LOGGER.error("Error while perfoming Task " + gitCommand.toString(), t);
-			t.printStackTrace();
 			throw t;
 		}
 	}

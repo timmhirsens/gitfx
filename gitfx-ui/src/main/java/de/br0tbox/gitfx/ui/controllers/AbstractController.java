@@ -1,6 +1,5 @@
 package de.br0tbox.gitfx.ui.controllers;
 
-import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -17,6 +16,9 @@ import javafx.stage.Stage;
 
 import javax.inject.Inject;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.cathive.fx.guice.GuiceFXMLLoader;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
 
@@ -28,6 +30,7 @@ public abstract class AbstractController {
 
 	private static ThreadPoolExecutor executorService;
 	private MessageBundle messageBundle = new MessageBundle();
+	private static final Logger LOGGER = LogManager.getLogger(AbstractController.class);
 
 	public static ThreadPoolExecutor getExecutorService() {
 		if (executorService == null) {
@@ -76,8 +79,9 @@ public abstract class AbstractController {
 			controller.setTask(task);
 			getExecutorService().submit(task);
 			controller.show();
-		} catch (final IOException e) {
-			e.printStackTrace();
+		} catch (final Exception e) {
+			LOGGER.error(e);
+			showErrorMessage("00001", e);
 		}
 
 	}
@@ -101,7 +105,7 @@ public abstract class AbstractController {
 
 	protected DialogResponse showErrorMessage(String code, Throwable throwable, String... parameters) {
 		final Message message = messageBundle.getMessage(code, parameters);
-		return Dialogs.showErrorDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel());
+		return Dialogs.showErrorDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel(), throwable);
 	}
 
 	protected DialogResponse showMessage(String code, String... parameters) {

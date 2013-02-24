@@ -49,6 +49,7 @@ public class LoadingDialogController extends AbstractController {
 	private Stage stage;
 	@FXML
 	ProgressBar currentTaskBar;
+	private Scene scene;
 
 	public LoadingDialogController() {
 		super();
@@ -61,7 +62,7 @@ public class LoadingDialogController extends AbstractController {
 	public void show() {
 		checkNotNull(task, "task");
 		stage = new Stage();
-		final Scene scene = new Scene(pane);
+		scene = new Scene(pane);
 		stage.initModality(Modality.APPLICATION_MODAL);
 		stage.setScene(scene);
 		stage.showAndWait();

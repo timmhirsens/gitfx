@@ -1,5 +1,6 @@
 package de.br0tbox.gitfx.ui.controllers;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TreeItem;
@@ -48,7 +50,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.EmptyTreeIterator;
-import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import com.cathive.fx.guice.FXMLController;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
@@ -87,6 +88,9 @@ public class SingleProjectController extends AbstractController {
 	private ToggleButton listButton;
 	@FXML
 	ListView commitList;
+	@FXML
+	private TextArea changesView;
+
 	private List<ListenerHandle> listenerHandles = new ArrayList<>();
 	private ChangeListener<Number> uncommitedChangesListener;
 	@FXML
@@ -96,13 +100,14 @@ public class SingleProjectController extends AbstractController {
 	protected void onInit() {
 		recentButton.setToggleGroup(toggleGroup);
 		listButton.setToggleGroup(toggleGroup);
+		changesView.setEditable(false);
 		modelToView();
 		addCommitClickedListener();
 		setCommitButtonText(projectModel.getChanges());
 		getStage().setOnCloseRequest(new EventHandler<WindowEvent>() {
 			// Clean up listeners when project is closed.
 			@Override
-			public void handle(WindowEvent arg0) {
+			public void handle(WindowEvent windowEvent) {
 				for (final ListenerHandle handle : listenerHandles) {
 					handle.remove();
 					projectModel.getChangesProperty().removeListener(uncommitedChangesListener);
@@ -286,7 +291,8 @@ public class SingleProjectController extends AbstractController {
 				parent = revWalk.parseCommit(commit.getParent(0).getId());
 			}
 
-			final DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+			final ByteArrayOutputStream out = new ByteArrayOutputStream();
+			final DiffFormatter df = new DiffFormatter(out);
 			df.setRepository(repository);
 			df.setDiffComparator(RawTextComparator.DEFAULT);
 			df.setDetectRenames(true);
@@ -299,6 +305,9 @@ public class SingleProjectController extends AbstractController {
 			final ObservableList items = commitList.getItems();
 			items.clear();
 			for (final DiffEntry diff : diffs) {
+				df.format(diff);
+				final String changes = out.toString("UTF-8");
+				changesView.setText(changes);
 				if (ChangeType.DELETE.equals(diff.getChangeType())) {
 					items.add(diff.getChangeType().toString().subSequence(0, 1) + " " + diff.getOldPath());
 				} else {
