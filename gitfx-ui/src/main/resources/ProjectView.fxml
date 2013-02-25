@@ -6,7 +6,6 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
-<?language javascript?>
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml" fx:controller="de.br0tbox.gitfx.ui.controllers.ProjectsController">
   <children>
@@ -34,7 +33,7 @@
           <children>
             <ToolBar>
               <items>
-                <Button fx:id="addButton" mnemonicParsing="false" onAction="controller.addButtonClicked()">
+                <Button fx:id="addButton" mnemonicParsing="false" onAction="#addButtonClicked">
                   <graphic>
                     <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>
@@ -43,7 +42,7 @@
                     </ImageView>
                   </graphic>
                 </Button>
-                <Button fx:id="deleteButton" mnemonicParsing="false" onAction="controller.deleteSelectedProject()">
+                <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteSelectedProject">
                   <graphic>
                     <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>
@@ -52,7 +51,7 @@
                     </ImageView>
                   </graphic>
                 </Button>
-                <Button fx:id="cloneButton" mnemonicParsing="false" onAction="controller.cloneButtonClicked()">
+                <Button fx:id="cloneButton" mnemonicParsing="false" onAction="#cloneButtonClicked">
                   <graphic>
                     <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>

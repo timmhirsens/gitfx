@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?language javascript?>
 <?import de.br0tbox.gitfx.ui.fx.*?>
 <?import de.br0tbox.gitfx.ui.uimodel.*?>
 <?import java.lang.*?>
@@ -130,7 +129,7 @@
                     </ImageView>
                   </graphic>
                 </Button>
-                <Button fx:id="commitButton" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" onAction="controller.commitButtonClicked()" text="Commit">
+                <Button fx:id="commitButton" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" onAction="#commitButtonClicked" text="Commit">
                   <graphic>
                     <ImageView fx:id="commitButtonImage" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>

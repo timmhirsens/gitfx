@@ -168,6 +168,7 @@ public class SingleProjectController extends AbstractController {
 		});
 	}
 
+	@FXML
 	public void commitButtonClicked() {
 		try {
 			final Result result = fxmlLoader.load(getClass().getResource("/CommitDialogView.fxml"));
