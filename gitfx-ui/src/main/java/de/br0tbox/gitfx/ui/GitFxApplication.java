@@ -16,8 +16,6 @@
 package de.br0tbox.gitfx.ui;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -68,12 +66,9 @@ public class GitFxApplication extends GuiceApplication {
 	}
 
 	@Override
-	public Collection<Module> initModules() {
-		final List<Module> modules = new ArrayList<>();
+	public void init(List<Module> modules) throws Exception {
 		final MainModule mainModule = new MainModule();
 		modules.add(mainModule);
-		return modules;
-
 	}
 
 	@Override
