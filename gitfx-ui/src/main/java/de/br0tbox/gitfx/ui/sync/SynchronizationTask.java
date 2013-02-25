@@ -54,7 +54,7 @@ public class SynchronizationTask extends Task<Void> {
 
 	@Override
 	protected Void call() throws Exception {
-		LOGGER.debug("Refreshing git repository");
+		LOGGER.debug("Refreshing git repository: " + projectModel.getProjectName());
 		refreshCurrentBranch();
 		refreshUncommitedChangesNumber();
 		refreshIndex();

@@ -23,6 +23,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jgit.events.IndexChangedEvent;
 import org.eclipse.jgit.events.IndexChangedListener;
@@ -37,6 +41,18 @@ public class RepositorySyncService implements IRepositorySyncService {
 	private Set<ProjectModel> projectModels = new HashSet<>();
 	private Map<ProjectModel, TimerTask> refreshTimers = new HashMap<>();
 	private Map<ProjectModel, List<ListenerHandle>> listenerHandles = new HashMap<>();
+	private ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactory() {
+
+		private AtomicInteger threadCount = new AtomicInteger(0);
+
+		@Override
+		public Thread newThread(Runnable r) {
+			final Thread t = new Thread(r);
+			t.setDaemon(true);
+			t.setName("sync-worker #" + threadCount.getAndIncrement());
+			return t;
+		}
+	});
 
 	@Override
 	public void startWatchingRepository(final ProjectModel projectModel) {
@@ -79,9 +95,7 @@ public class RepositorySyncService implements IRepositorySyncService {
 
 	private void startTask(ProjectModel model) {
 		final SynchronizationTask synchronizationTask = new SynchronizationTask(model);
-		final Thread thread = new Thread(synchronizationTask, "Sync-" + model.getProjectName());
-		thread.setDaemon(true);
-		thread.start();
+		executorService.submit(synchronizationTask);
 	}
 
 	private void startTimer(final ProjectModel projectModel) {
