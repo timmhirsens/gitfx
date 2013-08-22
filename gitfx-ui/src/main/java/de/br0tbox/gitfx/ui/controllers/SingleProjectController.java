@@ -349,4 +349,8 @@ public class SingleProjectController extends AbstractController {
 	public void pullAction(ActionEvent actionEvent) {
 		runGitTaskWithProgressDialog(GitTaskFactory.pullTask(projectModel.getFxProject().getGit().pull()));
 	}
+
+	public void pushAction(ActionEvent actionEvent) {
+		runGitTaskWithProgressDialog(GitTaskFactory.pushTask(projectModel.getFxProject().getGit().push()));
+	}
 }

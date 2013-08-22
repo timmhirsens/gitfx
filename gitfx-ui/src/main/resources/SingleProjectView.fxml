@@ -150,7 +150,7 @@
                     <MenuItem mnemonicParsing="false" onAction="#fetchClicked" text="Fetch" />
                   </items>
                 </SplitMenuButton>
-                <Button fx:id="pushButton" contentDisplay="TOP" mnemonicParsing="false" text="Push">
+                <Button fx:id="pushButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#pushAction" text="Push">
                   <graphic>
                     <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>

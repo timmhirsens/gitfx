@@ -21,6 +21,7 @@ package de.br0tbox.gitfx.ui.progress;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.PullCommand;
+import org.eclipse.jgit.api.PushCommand;
 
 /**
  * @author fr1zle
@@ -48,5 +49,10 @@ public final class GitTaskFactory {
 		final GitPullTask gitPullTask = new GitPullTask(pullCommand);
 		gitPullTask.init();
 		return gitPullTask;
+	}
+	public static GitPushTask pushTask(PushCommand pushCommand) {
+		final GitPushTask gitPushTask = new GitPushTask(pushCommand);
+		gitPushTask.init();
+		return gitPushTask;
 	}
 }

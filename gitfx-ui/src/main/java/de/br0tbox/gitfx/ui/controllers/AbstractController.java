@@ -110,28 +110,28 @@ public abstract class AbstractController {
 					}
 				});
 				Throwable exception = event.getSource().getException();
-				Dialogs.create().owner(stage).masthead("An error occured").title("Error").showException(exception);
+				Dialogs.create().nativeTitleBar().owner(stage).masthead("An error occured").title("Error").showException(exception);
 			}
 		};
 	}
 
 	protected Action showErrorMessage(String code, Throwable throwable, String... parameters) {
 		final Message message = messageBundle.getMessage(code, parameters);
-		return Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showError();
+		return Dialogs.create().owner(getStage()).nativeTitleBar().message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showError();
 	}
 
 	protected Action showMessage(String code, String... parameters) {
 		final Message message = messageBundle.getMessage(code, parameters);
 		switch (message.getType()) {
 			case ERROR:
-				return Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showError();
+				return Dialogs.create().owner(getStage()).nativeTitleBar().message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showError();
 			case CONFIRMATION:
-				return Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showConfirm();
+				return Dialogs.create().owner(getStage()).nativeTitleBar().message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showConfirm();
 			case INFO:
-				Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showInformation();
+				Dialogs.create().owner(getStage()).nativeTitleBar().message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showInformation();
 				return null;
 			case WARNING:
-				return Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showWarning();
+				return Dialogs.create().owner(getStage()).nativeTitleBar().message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showWarning();
 			default:
 				throw new UnsupportedOperationException();
 		}

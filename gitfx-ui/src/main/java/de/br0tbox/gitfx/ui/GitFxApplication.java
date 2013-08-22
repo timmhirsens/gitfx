@@ -58,7 +58,7 @@ public class GitFxApplication extends GuiceApplication {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				LOGGER.error("Unhandled Exception: " + e.getMessage() + "", e);
-				Dialogs.create().masthead("An unexpected error occurred. Application will exit.").title("Unexpected Error").showExceptionInNewWindow(e);
+				Dialogs.create().masthead("An unexpected error occurred. Application will exit.").nativeTitleBar().title("Unexpected Error").showExceptionInNewWindow(e);
 				System.exit(100);
 			}
 		};
