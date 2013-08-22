@@ -15,31 +15,26 @@
  */
 package de.br0tbox.gitfx.ui.controllers;
 
+import com.cathive.fx.guice.GuiceFXMLLoader;
+import com.cathive.fx.guice.GuiceFXMLLoader.Result;
+import de.br0tbox.gitfx.ui.message.Message;
+import de.br0tbox.gitfx.ui.message.MessageBundle;
+import de.br0tbox.gitfx.ui.progress.AbstractMonitorableGitTask;
+import javafx.application.Platform;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
+import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.action.Action;
+import org.controlsfx.dialog.Dialogs;
+
+import javax.inject.Inject;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javafx.application.Platform;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
-import javafx.scene.control.Dialogs;
-import javafx.scene.control.Dialogs.DialogOptions;
-import javafx.scene.control.Dialogs.DialogResponse;
-import javafx.stage.Stage;
-
-import javax.inject.Inject;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.cathive.fx.guice.GuiceFXMLLoader;
-import com.cathive.fx.guice.GuiceFXMLLoader.Result;
-
-import de.br0tbox.gitfx.ui.message.Message;
-import de.br0tbox.gitfx.ui.message.MessageBundle;
-import de.br0tbox.gitfx.ui.progress.AbstractMonitorableGitTask;
 
 public abstract class AbstractController {
 
@@ -114,29 +109,31 @@ public abstract class AbstractController {
 						controller.hide();
 					}
 				});
+				Throwable exception = event.getSource().getException();
+				Dialogs.create().owner(stage).masthead("An error occured").title("Error").showException(exception);
 			}
 		};
 	}
 
-	protected DialogResponse showErrorMessage(String code, Throwable throwable, String... parameters) {
+	protected Action showErrorMessage(String code, Throwable throwable, String... parameters) {
 		final Message message = messageBundle.getMessage(code, parameters);
-		return Dialogs.showErrorDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel(), throwable);
+		return Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showError();
 	}
 
-	protected DialogResponse showMessage(String code, String... parameters) {
+	protected Action showMessage(String code, String... parameters) {
 		final Message message = messageBundle.getMessage(code, parameters);
 		switch (message.getType()) {
-		case ERROR:
-			return Dialogs.showErrorDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel());
-		case CONFIRMATION:
-			return Dialogs.showConfirmDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel(), DialogOptions.YES_NO_CANCEL);
-		case INFO:
-			Dialogs.showInformationDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel());
-			return null;
-		case WARNING:
-			return Dialogs.showWarningDialog(getStage(), message.getText(), message.getMasthead(), message.getTitel());
-		default:
-			throw new UnsupportedOperationException();
+			case ERROR:
+				return Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showError();
+			case CONFIRMATION:
+				return Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showConfirm();
+			case INFO:
+				Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showInformation();
+				return null;
+			case WARNING:
+				return Dialogs.create().owner(getStage()).message(message.getText()).masthead(message.getMasthead()).title(message.getTitel()).showWarning();
+			default:
+				throw new UnsupportedOperationException();
 		}
 	}
 }

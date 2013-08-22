@@ -15,31 +15,28 @@
  */
 package de.br0tbox.gitfx.ui;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.List;
-import java.util.Set;
-
+import com.cathive.fx.guice.GuiceApplication;
+import com.cathive.fx.guice.GuiceFXMLLoader;
+import com.cathive.fx.guice.GuiceFXMLLoader.Result;
+import com.google.inject.Module;
+import com.sun.javafx.runtime.VersionInfo;
+import de.br0tbox.gitfx.ui.controllers.AbstractController;
+import de.br0tbox.gitfx.ui.modules.MainModule;
+import de.br0tbox.gitfx.ui.shutdown.IShutdownHook;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
-import javax.inject.Inject;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.dialog.Dialogs;
 
-import com.cathive.fx.guice.GuiceApplication;
-import com.cathive.fx.guice.GuiceFXMLLoader;
-import com.cathive.fx.guice.GuiceFXMLLoader.Result;
-import com.google.inject.Module;
-import com.sun.javafx.runtime.VersionInfo;
-
-import de.br0tbox.gitfx.ui.controllers.AbstractController;
-import de.br0tbox.gitfx.ui.modules.MainModule;
-import de.br0tbox.gitfx.ui.shutdown.IShutdownHook;
+import javax.inject.Inject;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.List;
+import java.util.Set;
 
 public class GitFxApplication extends GuiceApplication {
 
@@ -57,9 +54,12 @@ public class GitFxApplication extends GuiceApplication {
 	 */
 	public static void main(String[] args) {
 		uncaughtExceptionHandler = new UncaughtExceptionHandler() {
+
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				LOGGER.error("Unhandled Exception: " + e.getMessage() + "", e);
+				Dialogs.create().masthead("An unexpected error occurred. Application will exit.").title("Unexpected Error").showExceptionInNewWindow(e);
+				System.exit(100);
 			}
 		};
 		launch(args);
@@ -77,7 +77,7 @@ public class GitFxApplication extends GuiceApplication {
 		LOGGER.debug("Running JavaFX version {}", VersionInfo.getRuntimeVersion());
 		final Result result = fxmlLoader.load(this.getClass().getResource("/ProjectView.fxml"));
 		final Parent root = result.getRoot();
-		result.<AbstractController> getController().init(primaryStage);
+		result.<AbstractController>getController().init(primaryStage);
 		// XXX: This doesn't work yet, since Platform.runLater() swallows every Exception :/
 		// 		@see: http://javafx-jira.kenai.com/browse/RT-15332
 		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);

@@ -22,11 +22,12 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Dialogs;
-import javafx.scene.control.Dialogs.DialogResponse;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 
+import org.controlsfx.control.action.Action;
+import org.controlsfx.dialog.Dialog;
+import org.controlsfx.dialog.Dialogs;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -61,7 +62,7 @@ public class CommitDialogController extends AbstractController {
 			}
 			add.call();
 		} catch (final GitAPIException e) {
-			Dialogs.showErrorDialog(getStage(), "Error while Staging", "An error occured", "Error", e);
+			Dialogs.create().owner(getStage()).message("Error while Staging").masthead("An error occured").title("Error").showException(e);
 		}
 	}
 
@@ -75,7 +76,7 @@ public class CommitDialogController extends AbstractController {
 			addUpdate.addFilepattern(".");
 			addUpdate.call();
 		} catch (final GitAPIException e) {
-			Dialogs.showErrorDialog(getStage(), "Error while Staging", "An error occured", "Error", e);
+			Dialogs.create().owner(getStage()).message("Error while Staging").masthead("An error occured").title("Error").showException(e);
 		}
 	}
 
@@ -85,8 +86,8 @@ public class CommitDialogController extends AbstractController {
 			final CommitCommand commit = projectModel.getFxProject().getGit().commit();
 			final ObservableList<String> unstagedChanges = projectModel.getStagedChangesProperty().get();
 			if (unstagedChanges.size() < 1) {
-				final DialogResponse commitAll = Dialogs.showConfirmDialog(getStage(), "There are no changes staged, do you want to commit every changed File?");
-				if (DialogResponse.YES.equals(commitAll)) {
+				final Action commitAll = Dialogs.create().owner(getStage()).message("There are no changes staged, do you want to commit every changed File?").showConfirm();
+				if (Dialog.Actions.YES.equals(commitAll)) {
 					//FIXME: Threading issue, this is a workaround that seems to work for now.
 					stageAll();
 					projectModel.getFxProject().getGit().getRepository().getListenerList().dispatch(new IndexChangedEvent());

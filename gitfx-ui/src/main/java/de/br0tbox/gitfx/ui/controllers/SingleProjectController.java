@@ -15,39 +15,34 @@
  */
 package de.br0tbox.gitfx.ui.controllers;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.cathive.fx.guice.FXMLController;
+import com.cathive.fx.guice.GuiceFXMLLoader.Result;
+import de.br0tbox.gitfx.core.util.Preconditions;
+import de.br0tbox.gitfx.ui.fx.ChangedFileListCell;
+import de.br0tbox.gitfx.ui.history.CommitTableCell;
+import de.br0tbox.gitfx.ui.history.JavaFxPlotRenderer;
+import de.br0tbox.gitfx.ui.progress.GitTaskFactory;
+import de.br0tbox.gitfx.ui.uimodel.GitFxCommit;
+import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.ObservableValueBase;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
 import javafx.scene.control.TableColumn.CellDataFeatures;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
@@ -66,15 +61,10 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 
-import com.cathive.fx.guice.FXMLController;
-import com.cathive.fx.guice.GuiceFXMLLoader.Result;
-
-import de.br0tbox.gitfx.core.util.Preconditions;
-import de.br0tbox.gitfx.ui.fx.ChangedFileListCell;
-import de.br0tbox.gitfx.ui.history.CommitTableCell;
-import de.br0tbox.gitfx.ui.history.JavaFxPlotRenderer;
-import de.br0tbox.gitfx.ui.uimodel.GitFxCommit;
-import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @FXMLController(controllerId = "/SingleProjectView.fxml")
 public class SingleProjectController extends AbstractController {
@@ -82,7 +72,8 @@ public class SingleProjectController extends AbstractController {
 	static final Image IMAGE_COMMIT_CLEAN = new Image(ChangedFileListCell.class.getResourceAsStream("/icons/accept.png"));
 	static final Image IMAGE_COMMIT_DIRTY = new Image(ChangedFileListCell.class.getResourceAsStream("/icons/asterisk_yellow.png"));
 	private static final Logger LOGGER = LogManager.getLogger(SingleProjectController.class);
-
+	@FXML
+	private SplitPane splitPane;
 	private ProjectModel projectModel;
 	@FXML
 	private TableView<GitFxCommit> tableView;
@@ -115,11 +106,12 @@ public class SingleProjectController extends AbstractController {
 	protected void onInit() {
 		recentButton.setToggleGroup(toggleGroup);
 		listButton.setToggleGroup(toggleGroup);
-		changesView.setEditable(false);
+		tableView.prefHeightProperty().bind(splitPane.heightProperty());
 		modelToView();
 		addCommitClickedListener();
 		setCommitButtonText(projectModel.getChanges());
 		getStage().setOnCloseRequest(new EventHandler<WindowEvent>() {
+
 			// Clean up listeners when project is closed.
 			@Override
 			public void handle(WindowEvent windowEvent) {
@@ -198,6 +190,7 @@ public class SingleProjectController extends AbstractController {
 
 	private void addCommitClickedListener() {
 		tableView.setOnMouseClicked(new EventHandler<Event>() {
+
 			@Override
 			public void handle(Event arg0) {
 				final GitFxCommit selectedItem = tableView.getSelectionModel().getSelectedItem();
@@ -349,4 +342,11 @@ public class SingleProjectController extends AbstractController {
 		}
 	}
 
+	public void fetchClicked(ActionEvent actionEvent) {
+		runGitTaskWithProgressDialog(GitTaskFactory.fetchTask(projectModel.getFxProject().getGit().fetch()));
+	}
+
+	public void pullAction(ActionEvent actionEvent) {
+		runGitTaskWithProgressDialog(GitTaskFactory.pullTask(projectModel.getFxProject().getGit().pull()));
+	}
 }

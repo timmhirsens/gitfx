@@ -26,7 +26,7 @@
         </ToolBar>
       </bottom>
       <center>
-        <SplitPane dividerPositions="0.5014619883040936" focusTraversable="true" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+        <SplitPane fx:id="splitPane" dividerPositions="0.5" focusTraversable="true" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
           <items>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
               <children>
@@ -97,9 +97,9 @@
         </TreeView>
       </left>
       <top>
-        <VBox minHeight="27.0" prefHeight="74.0" prefWidth="1280.0">
+        <VBox prefWidth="1280.0">
           <children>
-            <MenuBar minHeight="20.0" prefHeight="25.0" prefWidth="1024.0">
+            <MenuBar prefWidth="1024.0">
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
@@ -138,7 +138,7 @@
                     </ImageView>
                   </graphic>
                 </Button>
-                <SplitMenuButton fx:id="pullButton" contentDisplay="TOP" mnemonicParsing="false" text="Pull">
+                <SplitMenuButton fx:id="pullButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#pullAction" text="Pull">
                   <graphic>
                     <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>
@@ -147,8 +147,7 @@
                     </ImageView>
                   </graphic>
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Action 1" />
-                    <MenuItem mnemonicParsing="false" text="Action 2" />
+                    <MenuItem mnemonicParsing="false" onAction="#fetchClicked" text="Fetch" />
                   </items>
                 </SplitMenuButton>
                 <Button fx:id="pushButton" contentDisplay="TOP" mnemonicParsing="false" text="Push">

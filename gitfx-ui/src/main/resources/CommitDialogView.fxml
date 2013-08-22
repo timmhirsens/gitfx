@@ -22,8 +22,8 @@
                         <ListView fx:id="unstagedFiles" prefHeight="240.5" prefWidth="346.0" />
                         <ToolBar>
                           <items>
-                            <Button mnemonicParsing="false" onAction="controller.stageSelected()" text="Stage" />
-                            <Button mnemonicParsing="false" onAction="controller.stageAll()" text="Stage All" />
+                            <Button mnemonicParsing="false" onAction="#stageSelected" text="Stage" />
+                            <Button mnemonicParsing="false" onAction="#stageAll" text="Stage All" />
                           </items>
                         </ToolBar>
                       </children>
@@ -47,7 +47,7 @@
                 <ToolBar>
                   <items>
                     <CheckBox mnemonicParsing="false" text="Sign-Off" />
-                    <Button mnemonicParsing="false" onAction="controller.commit()" text="Commit" />
+                    <Button mnemonicParsing="false" onAction="#commit" text="Commit" />
                   </items>
                 </ToolBar>
               </children>

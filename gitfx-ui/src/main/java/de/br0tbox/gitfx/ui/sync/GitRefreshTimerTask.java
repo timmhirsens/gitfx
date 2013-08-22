@@ -15,17 +15,15 @@
  */
 package de.br0tbox.gitfx.ui.sync;
 
-import java.io.IOException;
-import java.util.TimerTask;
-
+import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
 import javafx.application.Platform;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.events.IndexChangedEvent;
 import org.eclipse.jgit.lib.Repository;
 
-import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
+import java.io.IOException;
+import java.util.TimerTask;
 
 public class GitRefreshTimerTask extends TimerTask {
 
