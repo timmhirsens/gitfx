@@ -110,7 +110,9 @@ public abstract class AbstractController {
 					}
 				});
 				Throwable exception = event.getSource().getException();
-				Dialogs.create().nativeTitleBar().owner(stage).masthead("An error occured").title("Error").showException(exception);
+				if (exception != null) {
+					Dialogs.create().nativeTitleBar().owner(stage).masthead("An error occured").title("Error").showException(exception);
+				}
 			}
 		};
 	}
