@@ -47,23 +47,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <repositories>
-        <repository>
-            <!-- TODO: Mirror in Spout Repo. -->
-            <id>oss-sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>spout-repo</id>
-            <name>Spout Repo</name>
-            <url>http://nexus.spout.org/content/groups/public/</url>
-        </repository>
-    </repositories>
-
     <build>
         <pluginManagement>
             <plugins>
