@@ -17,13 +17,13 @@ package de.br0tbox.gitfx.ui.controllers;
 
 import com.cathive.fx.guice.FXMLController;
 import com.cathive.fx.guice.GuiceFXMLLoader.Result;
-import de.br0tbox.gitfx.ui.util.Preconditions;
 import de.br0tbox.gitfx.ui.fx.ChangedFileListCell;
 import de.br0tbox.gitfx.ui.history.CommitTableCell;
 import de.br0tbox.gitfx.ui.history.JavaFxPlotRenderer;
 import de.br0tbox.gitfx.ui.progress.GitTaskFactory;
 import de.br0tbox.gitfx.ui.uimodel.GitFxCommit;
 import de.br0tbox.gitfx.ui.uimodel.ProjectModel;
+import de.br0tbox.gitfx.ui.util.Preconditions;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.ObservableValueBase;
@@ -164,154 +164,154 @@ public class SingleProjectController extends AbstractController {
 	}
 
 	private void addCommitClickedListener() {
-				tableView.setOnMouseClicked(event -> {
-					final GitFxCommit selectedItem = tableView.getSelectionModel().getSelectedItem();
-					if (selectedItem == null) {
-						return;
-					}
-					showHistoryForCommit(selectedItem);
-				});
+		tableView.setOnMouseClicked(event -> {
+			final GitFxCommit selectedItem = tableView.getSelectionModel().getSelectedItem();
+			if (selectedItem == null) {
+				return;
 			}
+			showHistoryForCommit(selectedItem);
+		});
+	}
 
-			private void modelToView() {
-				getStage().setTitle(projectModel.getProjectName() + " (" + projectModel.getCurrentBranch() + ") - GitFx");
-				getStage().getIcons().add(new Image(SingleProjectController.class.getResourceAsStream("/icons/package.png")));
-				tableView.getItems().clear();
-				try {
-					addCommitsLogToView();
-					addBranchesToView();
-				} catch (final IOException e) {
-					LOGGER.error("Error while creating log view.", e);
-				}
-			}
-
-			private void addCommitsLogToView() throws MissingObjectException, IncorrectObjectTypeException, IOException {
-				tableView.getItems().clear();
-				final ObservableList<GitFxCommit> commits = projectModel.getCommitsProperty();
-				final JavaFxPlotRenderer renderer = new JavaFxPlotRenderer();
-				final TableColumn<GitFxCommit, GitFxCommit> tableColumn = (TableColumn<GitFxCommit, GitFxCommit>) tableView.getColumns().get(0);
-				tableColumn.setCellFactory(createCommitCellFactory(renderer));
-				tableColumn.setCellValueFactory(createCellValueFactory());
-				tableView.getItems().addAll(commits);
-			}
-
-			private Callback<CellDataFeatures<GitFxCommit, GitFxCommit>, ObservableValue<GitFxCommit>> createCellValueFactory() {
-				return dataFeatures -> new ObservableValueBase<GitFxCommit>() {
-
-					@Override
-					public GitFxCommit getValue() {
-						return dataFeatures.getValue();
-					}
-				};
-			}
-
-			private Callback<TableColumn<GitFxCommit, GitFxCommit>, TableCell<GitFxCommit, GitFxCommit>> createCommitCellFactory(final JavaFxPlotRenderer renderer) {
-				return arg0 -> {
-					final CommitTableCell<GitFxCommit> commitTableCell = new CommitTableCell<>(renderer);
-					return commitTableCell;
-				};
-			}
-
-			private void addBranchesToView() {
-				treeView.showRootProperty().set(false);
-				branchesItem.getChildren().clear();
-				remotesItem.getChildren().clear();
-				tagsItem.getChildren().clear();
-				final List<String> localList = projectModel.getLocalBranchesProperty();
-				final List<String> remoteList = projectModel.getRemoteBranchesProperty();
-				final List<String> tagsList = projectModel.getTagsProperty();
-				for (String local : localList) {
-					if (local.startsWith(Constants.R_HEADS)) {
-						local = local.substring(Constants.R_HEADS.length(), local.length());
-					}
-					branchesItem.getChildren().add(new TreeItem(local));
-				}
-				for (String remote : remoteList) {
-					if (remote.startsWith(Constants.R_REMOTES)) {
-						remote = remote.substring(Constants.R_REMOTES.length(), remote.length());
-					}
-					remotesItem.getChildren().add(new TreeItem(remote));
-				}
-				for (String tag : tagsList) {
-					if (tag.startsWith(Constants.R_TAGS)) {
-						tag = tag.substring(Constants.R_TAGS.length(), tag.length());
-					}
-					tagsItem.getChildren().add(new TreeItem(tag));
-				}
-				branchesItem.expandedProperty().set(true);
-				remotesItem.expandedProperty().set(true);
-				tagsItem.expandedProperty().set(true);
-			}
-
-			public void setProject(ProjectModel projectModel) {
-				this.projectModel = projectModel;
-			}
-
-			private void showHistoryForCommit(final GitFxCommit selectedCommit) {
-				Preconditions.checkNotNull(selectedCommit, "selectedCommit");
-				final Git git = projectModel.getFxProject().getGit();
-				final Repository repository = git.getRepository();
-				ObjectId resolve;
-				try {
-					resolve = repository.resolve(selectedCommit.getHash());
-					final RevWalk revWalk = new RevWalk(repository);
-					final RevCommit commit = revWalk.parseCommit(resolve);
-					RevCommit parent = null;
-					if (commit.getParents().length > 0 && commit.getParent(0) != null) {
-						parent = revWalk.parseCommit(commit.getParent(0).getId());
-					}
-
-					final ByteArrayOutputStream out = new ByteArrayOutputStream();
-					final DiffFormatter df = new DiffFormatter(out);
-					df.setRepository(repository);
-					df.setDiffComparator(RawTextComparator.DEFAULT);
-					df.setDetectRenames(true);
-					List<DiffEntry> diffs = null;
-					if (parent != null) {
-						diffs = df.scan(parent.getTree(), commit.getTree());
-					} else {
-						diffs = df.scan(new EmptyTreeIterator(), new CanonicalTreeParser(null, revWalk.getObjectReader(), commit.getTree()));
-					}
-					final ObservableList items = commitList.getItems();
-					items.clear();
-					for (final DiffEntry diff : diffs) {
-						df.format(diff);
-						final String changes = out.toString("UTF-8");
-						changesView.setText(changes);
-						if (ChangeType.DELETE.equals(diff.getChangeType())) {
-							items.add(diff.getChangeType().toString().subSequence(0, 1) + " " + diff.getOldPath());
-						} else {
-							items.add(diff.getChangeType().toString().subSequence(0, 1) + " " + diff.getNewPath());
-						}
-					}
-					revWalk.release();
-					df.release();
-				} catch (final IOException e) {
-					LOGGER.error("Error while showing changes for commit " + selectedCommit.getHash(), e);
-				}
-			}
-
-			private void setCommitButtonText(Number changedFileCount) {
-				if (changedFileCount.intValue() > 0) {
-					commitButton.setText("Commmit (" + changedFileCount + ")");
-					commitButtonImage.setImage(IMAGE_COMMIT_DIRTY);
-					commitButton.setDisable(false);
-				} else {
-					commitButton.setText("Commmit");
-					commitButtonImage.setImage(IMAGE_COMMIT_CLEAN);
-					commitButton.setDisable(true);
-				}
-			}
-
-			public void fetchClicked(ActionEvent actionEvent) {
-				runGitTaskWithProgressDialog(GitTaskFactory.fetchTask(projectModel.getFxProject().getGit().fetch()));
-			}
-
-			public void pullAction(ActionEvent actionEvent) {
-				runGitTaskWithProgressDialog(GitTaskFactory.pullTask(projectModel.getFxProject().getGit().pull()));
-			}
-
-			public void pushAction(ActionEvent actionEvent) {
-				runGitTaskWithProgressDialog(GitTaskFactory.pushTask(projectModel.getFxProject().getGit().push()));
-			}
+	private void modelToView() {
+		getStage().setTitle(projectModel.getProjectName() + " (" + projectModel.getCurrentBranch() + ") - GitFx");
+		getStage().getIcons().add(new Image(SingleProjectController.class.getResourceAsStream("/icons/package.png")));
+		tableView.getItems().clear();
+		try {
+			addCommitsLogToView();
+			addBranchesToView();
+		} catch (final IOException e) {
+			LOGGER.error("Error while creating log view.", e);
 		}
+	}
+
+	private void addCommitsLogToView() throws MissingObjectException, IncorrectObjectTypeException, IOException {
+		tableView.getItems().clear();
+		final ObservableList<GitFxCommit> commits = projectModel.getCommitsProperty();
+		final JavaFxPlotRenderer renderer = new JavaFxPlotRenderer();
+		final TableColumn<GitFxCommit, GitFxCommit> tableColumn = (TableColumn<GitFxCommit, GitFxCommit>) tableView.getColumns().get(0);
+		tableColumn.setCellFactory(createCommitCellFactory(renderer));
+		tableColumn.setCellValueFactory(createCellValueFactory());
+		tableView.getItems().addAll(commits);
+	}
+
+	private Callback<CellDataFeatures<GitFxCommit, GitFxCommit>, ObservableValue<GitFxCommit>> createCellValueFactory() {
+		return dataFeatures -> new ObservableValueBase<GitFxCommit>() {
+
+			@Override
+			public GitFxCommit getValue() {
+				return dataFeatures.getValue();
+			}
+		};
+	}
+
+	private Callback<TableColumn<GitFxCommit, GitFxCommit>, TableCell<GitFxCommit, GitFxCommit>> createCommitCellFactory(final JavaFxPlotRenderer renderer) {
+		return arg0 -> {
+			final CommitTableCell<GitFxCommit> commitTableCell = new CommitTableCell<>(renderer);
+			return commitTableCell;
+		};
+	}
+
+	private void addBranchesToView() {
+		treeView.showRootProperty().set(false);
+		branchesItem.getChildren().clear();
+		remotesItem.getChildren().clear();
+		tagsItem.getChildren().clear();
+		final List<String> localList = projectModel.getLocalBranchesProperty();
+		final List<String> remoteList = projectModel.getRemoteBranchesProperty();
+		final List<String> tagsList = projectModel.getTagsProperty();
+		for (String local : localList) {
+			if (local.startsWith(Constants.R_HEADS)) {
+				local = local.substring(Constants.R_HEADS.length(), local.length());
+			}
+			branchesItem.getChildren().add(new TreeItem(local));
+		}
+		for (String remote : remoteList) {
+			if (remote.startsWith(Constants.R_REMOTES)) {
+				remote = remote.substring(Constants.R_REMOTES.length(), remote.length());
+			}
+			remotesItem.getChildren().add(new TreeItem(remote));
+		}
+		for (String tag : tagsList) {
+			if (tag.startsWith(Constants.R_TAGS)) {
+				tag = tag.substring(Constants.R_TAGS.length(), tag.length());
+			}
+			tagsItem.getChildren().add(new TreeItem(tag));
+		}
+		branchesItem.expandedProperty().set(true);
+		remotesItem.expandedProperty().set(true);
+		tagsItem.expandedProperty().set(true);
+	}
+
+	public void setProject(ProjectModel projectModel) {
+		this.projectModel = projectModel;
+	}
+
+	private void showHistoryForCommit(final GitFxCommit selectedCommit) {
+		Preconditions.checkNotNull(selectedCommit, "selectedCommit");
+		final Git git = projectModel.getFxProject().getGit();
+		final Repository repository = git.getRepository();
+		ObjectId resolve;
+		try {
+			resolve = repository.resolve(selectedCommit.getHash());
+			final RevWalk revWalk = new RevWalk(repository);
+			final RevCommit commit = revWalk.parseCommit(resolve);
+			RevCommit parent = null;
+			if (commit.getParents().length > 0 && commit.getParent(0) != null) {
+				parent = revWalk.parseCommit(commit.getParent(0).getId());
+			}
+
+			final ByteArrayOutputStream out = new ByteArrayOutputStream();
+			final DiffFormatter df = new DiffFormatter(out);
+			df.setRepository(repository);
+			df.setDiffComparator(RawTextComparator.DEFAULT);
+			df.setDetectRenames(true);
+			List<DiffEntry> diffs = null;
+			if (parent != null) {
+				diffs = df.scan(parent.getTree(), commit.getTree());
+			} else {
+				diffs = df.scan(new EmptyTreeIterator(), new CanonicalTreeParser(null, revWalk.getObjectReader(), commit.getTree()));
+			}
+			final ObservableList items = commitList.getItems();
+			items.clear();
+			for (final DiffEntry diff : diffs) {
+				df.format(diff);
+				final String changes = out.toString("UTF-8");
+				changesView.setText(changes);
+				if (ChangeType.DELETE.equals(diff.getChangeType())) {
+					items.add(diff.getChangeType().toString().subSequence(0, 1) + " " + diff.getOldPath());
+				} else {
+					items.add(diff.getChangeType().toString().subSequence(0, 1) + " " + diff.getNewPath());
+				}
+			}
+			revWalk.release();
+			df.release();
+		} catch (final IOException e) {
+			LOGGER.error("Error while showing changes for commit " + selectedCommit.getHash(), e);
+		}
+	}
+
+	private void setCommitButtonText(Number changedFileCount) {
+		if (changedFileCount.intValue() > 0) {
+			commitButton.setText("Commmit (" + changedFileCount + ")");
+			commitButtonImage.setImage(IMAGE_COMMIT_DIRTY);
+			commitButton.setDisable(false);
+		} else {
+			commitButton.setText("Commmit");
+			commitButtonImage.setImage(IMAGE_COMMIT_CLEAN);
+			commitButton.setDisable(true);
+		}
+	}
+
+	public void fetchClicked(ActionEvent actionEvent) {
+		runGitTaskWithProgressDialog(GitTaskFactory.fetchTask(projectModel.getFxProject().getGit().fetch()));
+	}
+
+	public void pullAction(ActionEvent actionEvent) {
+		runGitTaskWithProgressDialog(GitTaskFactory.pullTask(projectModel.getFxProject().getGit().pull()));
+	}
+
+	public void pushAction(ActionEvent actionEvent) {
+		runGitTaskWithProgressDialog(GitTaskFactory.pushTask(projectModel.getFxProject().getGit().push()));
+	}
+}

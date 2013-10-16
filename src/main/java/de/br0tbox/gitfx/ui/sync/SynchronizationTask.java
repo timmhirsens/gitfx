@@ -111,7 +111,7 @@ public class SynchronizationTask extends Task<Void> {
 	private void refreshCommits() throws MissingObjectException, IncorrectObjectTypeException, IOException {
 		final Repository repository = projectModel.getFxProject().getGit().getRepository();
 		final RevWalk revWalk = new PlotWalk(repository);
-		revWalk.markStart(revWalk.parseCommit(repository.getRef("master").getObjectId()));
+		revWalk.markStart(revWalk.parseCommit(repository.getRef(repository.getBranch()).getObjectId()));
 		final JavaFxCommitList commitList = new JavaFxCommitList();
 		commitList.source(revWalk);
 		commitList.fillTo(512);
