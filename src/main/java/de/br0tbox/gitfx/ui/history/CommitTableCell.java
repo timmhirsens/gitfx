@@ -15,13 +15,11 @@
  */
 package de.br0tbox.gitfx.ui.history;
 
-import javafx.scene.Group;
-import javafx.scene.control.TableCell;
-
-import org.eclipse.jgit.revplot.PlotCommit;
-
 import de.br0tbox.gitfx.ui.history.JavaFxCommitList.JavaFxLane;
 import de.br0tbox.gitfx.ui.uimodel.GitFxCommit;
+import javafx.scene.Group;
+import javafx.scene.control.TableCell;
+import org.eclipse.jgit.revplot.PlotCommit;
 
 public class CommitTableCell<S> extends TableCell<S, GitFxCommit> {
 

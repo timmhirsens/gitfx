@@ -53,14 +53,10 @@ public class GitFxApplication extends GuiceApplication {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		uncaughtExceptionHandler = new UncaughtExceptionHandler() {
-
-			@Override
-			public void uncaughtException(Thread t, Throwable e) {
-				LOGGER.error("Unhandled Exception: " + e.getMessage() + "", e);
-				Dialogs.create().masthead("An unexpected error occurred. Application will exit.").nativeTitleBar().title("Unexpected Error").showExceptionInNewWindow(e);
-				System.exit(100);
-			}
+		uncaughtExceptionHandler = (t, e) -> {
+			LOGGER.error("Unhandled Exception: " + e.getMessage() + "", e);
+			Dialogs.create().masthead("An unexpected error occurred. Application will exit.").nativeTitleBar().title("Unexpected Error").showExceptionInNewWindow(e);
+			System.exit(100);
 		};
 		launch(args);
 	}
@@ -73,6 +69,7 @@ public class GitFxApplication extends GuiceApplication {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		primaryStage.setTitle("GitFX");
 		LOGGER.debug("Starting Application");
 		LOGGER.debug("Running JavaFX version {}", VersionInfo.getRuntimeVersion());
 		final Result result = fxmlLoader.load(this.getClass().getResource("/ProjectView.fxml"));
@@ -84,18 +81,14 @@ public class GitFxApplication extends GuiceApplication {
 		final Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
 		primaryStage.show();
-		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-
-			@Override
-			public void handle(WindowEvent event) {
-				for (final IShutdownHook shutdownHook : shutdownHooks) {
-					if (!event.isConsumed()) {
-						shutdownHook.onShutdown(event);
-					}
-				}
+		primaryStage.setOnCloseRequest(event -> {
+			for (final IShutdownHook shutdownHook : shutdownHooks) {
 				if (!event.isConsumed()) {
-					Platform.exit();
+					shutdownHook.onShutdown(event);
 				}
+			}
+			if (!event.isConsumed()) {
+				Platform.exit();
 			}
 		});
 		LOGGER.debug("Startup finished");

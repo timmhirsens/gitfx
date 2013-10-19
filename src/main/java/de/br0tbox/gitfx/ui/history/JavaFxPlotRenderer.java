@@ -15,18 +15,16 @@
  */
 package de.br0tbox.gitfx.ui.history;
 
+import de.br0tbox.gitfx.ui.history.JavaFxCommitList.JavaFxLane;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
-
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revplot.AbstractPlotRenderer;
 import org.eclipse.jgit.revplot.PlotCommit;
-
-import de.br0tbox.gitfx.ui.history.JavaFxCommitList.JavaFxLane;
 
 public class JavaFxPlotRenderer extends AbstractPlotRenderer<JavaFxLane, Color> {
 
@@ -56,10 +54,10 @@ public class JavaFxPlotRenderer extends AbstractPlotRenderer<JavaFxLane, Color> 
 		text.setY(y * 1.5);
 		text.setFill(Color.RED);
 		final double fontSize = text.getFont().getSize();
-		final int width = (int) Math.floor(fontSize * refName.trim().length() / 2);
-		// final Rectangle rectangle = RectangleBuilder.create().x(x).y(y /
-		// 2).width(width).height(fontSize + 3).fill(Color.RED).build();
-		// currentShape.getChildren().add(rectangle);
+		final int width = (int) Math.floor(fontSize * refName.trim().length() / 2 + 2);
+		//final Rectangle rectangle = RectangleBuilder.create().x(x).y(y /
+		//2).width(width).height(fontSize + 3).fill(Color.GRAY).build();
+		//currentShape.getChildren().add(rectangle);
 		currentShape.getChildren().add(text);
 		return (int) Math.floor(10 + width);
 	}

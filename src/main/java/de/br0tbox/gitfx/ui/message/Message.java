@@ -19,6 +19,17 @@ import java.util.List;
 
 public class Message {
 
+	public Message(String titel, MessageType type, String masthead, String text, List<String> options) {
+		this.titel = titel;
+		this.type = type;
+		this.masthead = masthead;
+		this.text = text;
+		this.options = options;
+	}
+
+	public Message() {
+	}
+
 	private String titel;
 	private MessageType type;
 	private String masthead;

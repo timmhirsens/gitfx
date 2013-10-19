@@ -89,14 +89,10 @@ public class ProjectsController extends AbstractController {
 			lastOpened = new File(lastOpenProperty);
 		}
 		loadProjects();
-		projectList.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
-			@Override
-			public void handle(MouseEvent mouseEvent) {
-				if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
-					if (mouseEvent.getClickCount() == 2) {
-						openSelectedProject();
-					}
+		projectList.setOnMouseClicked(mouseEvent -> {
+			if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
+				if (mouseEvent.getClickCount() == 2) {
+					openSelectedProject();
 				}
 			}
 		});

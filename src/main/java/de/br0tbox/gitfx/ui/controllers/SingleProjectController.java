@@ -46,8 +46,6 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.events.ListenerHandle;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -68,6 +66,7 @@ public class SingleProjectController extends AbstractController {
 	static final Image IMAGE_COMMIT_CLEAN = new Image(ChangedFileListCell.class.getResourceAsStream("/icons/accept.png"));
 	static final Image IMAGE_COMMIT_DIRTY = new Image(ChangedFileListCell.class.getResourceAsStream("/icons/asterisk_yellow.png"));
 	private static final Logger LOGGER = LogManager.getLogger(SingleProjectController.class);
+
 	@FXML
 	private SplitPane splitPane;
 	private ProjectModel projectModel;
@@ -92,14 +91,17 @@ public class SingleProjectController extends AbstractController {
 	ListView commitList;
 	@FXML
 	private TextArea changesView;
-
-	private List<ListenerHandle> listenerHandles = new ArrayList<>();
-	private ChangeListener<Number> uncommitedChangesListener;
+	@FXML
+	private MenuBar menuBar;
 	@FXML
 	ImageView commitButtonImage;
 
+	private List<ListenerHandle> listenerHandles = new ArrayList<>();
+	private ChangeListener<Number> uncommitedChangesListener;
+
 	@Override
 	protected void onInit() {
+		menuBar.setUseSystemMenuBar(true);
 		recentButton.setToggleGroup(toggleGroup);
 		listButton.setToggleGroup(toggleGroup);
 		tableView.prefHeightProperty().bind(splitPane.heightProperty());
@@ -185,7 +187,7 @@ public class SingleProjectController extends AbstractController {
 		}
 	}
 
-	private void addCommitsLogToView() throws MissingObjectException, IncorrectObjectTypeException, IOException {
+	private void addCommitsLogToView() throws IOException {
 		tableView.getItems().clear();
 		final ObservableList<GitFxCommit> commits = projectModel.getCommitsProperty();
 		final JavaFxPlotRenderer renderer = new JavaFxPlotRenderer();

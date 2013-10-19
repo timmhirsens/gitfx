@@ -91,13 +91,7 @@ public class CommitDialogController extends AbstractController {
 					//FIXME: Threading issue, this is a workaround that seems to work for now.
 					stageAll();
 					projectModel.getFxProject().getGit().getRepository().getListenerList().dispatch(new IndexChangedEvent());
-					Platform.runLater(new Runnable() {
-
-						@Override
-						public void run() {
-							commit();
-						}
-					});
+					Platform.runLater(this::commit);
 				}
 			} else {
 				commit.setMessage(commitMessage.getText());

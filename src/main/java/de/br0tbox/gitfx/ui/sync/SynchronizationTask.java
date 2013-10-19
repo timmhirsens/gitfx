@@ -74,15 +74,11 @@ public class SynchronizationTask extends Task<Void> {
 		stagedChanges.addAll(status.getAdded());
 		stagedChanges.addAll(status.getChanged());
 		stagedChanges.addAll(status.getRemoved());
-		Platform.runLater(new Runnable() {
-
-			@Override
-			public void run() {
-				projectModel.getUnstagedChangesProperty().getValue().clear();
-				projectModel.getStagedChangesProperty().getValue().clear();
-				projectModel.getUnstagedChangesProperty().getValue().addAll(unstagedChanges);
-				projectModel.getStagedChangesProperty().getValue().addAll(stagedChanges);
-			}
+		Platform.runLater(() -> {
+			projectModel.getUnstagedChangesProperty().getValue().clear();
+			projectModel.getStagedChangesProperty().getValue().clear();
+			projectModel.getUnstagedChangesProperty().getValue().addAll(unstagedChanges);
+			projectModel.getStagedChangesProperty().getValue().addAll(stagedChanges);
 		});
 	}
 
@@ -164,17 +160,13 @@ public class SynchronizationTask extends Task<Void> {
 				}
 			}
 		}
-		Platform.runLater(new Runnable() {
-
-			@Override
-			public void run() {
-				projectModel.getLocalBranchesProperty().clear();
-				projectModel.getLocalBranchesProperty().addAll(localList);
-				projectModel.getRemoteBranchesProperty().clear();
-				projectModel.getRemoteBranchesProperty().addAll(remoteList);
-				projectModel.getTagsProperty().clear();
-				projectModel.getTagsProperty().addAll(tagsList);
-			}
+		Platform.runLater(() -> {
+			projectModel.getLocalBranchesProperty().clear();
+			projectModel.getLocalBranchesProperty().addAll(localList);
+			projectModel.getRemoteBranchesProperty().clear();
+			projectModel.getRemoteBranchesProperty().addAll(remoteList);
+			projectModel.getTagsProperty().clear();
+			projectModel.getTagsProperty().addAll(tagsList);
 		});
 	}
 

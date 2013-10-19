@@ -37,7 +37,7 @@
                   <graphic>
                     <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>
-                        <Image url="icons/add.png" preserveRatio="false" smooth="false" />
+                        <Image url="@icons/add.png" preserveRatio="false" smooth="false" />
                       </image>
                     </ImageView>
                   </graphic>
@@ -46,7 +46,7 @@
                   <graphic>
                     <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>
-                        <Image url="icons/delete.png" preserveRatio="false" smooth="false" />
+                        <Image url="@icons/delete.png" preserveRatio="false" smooth="false" />
                       </image>
                     </ImageView>
                   </graphic>
@@ -55,7 +55,7 @@
                   <graphic>
                     <ImageView mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                       <image>
-                        <Image url="icons/page_copy.png" preserveRatio="false" smooth="false" />
+                        <Image url="@icons/page_copy.png" preserveRatio="false" smooth="false" />
                       </image>
                     </ImageView>
                   </graphic>

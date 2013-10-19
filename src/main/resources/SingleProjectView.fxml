@@ -15,7 +15,7 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-classpath-element ../../../target/classes?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="780.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml" fx:controller="de.br0tbox.gitfx.ui.controllers.SingleProjectController">
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="780.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="de.br0tbox.gitfx.ui.controllers.SingleProjectController">
   <children>
     <BorderPane prefHeight="600.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <bottom>
@@ -99,7 +99,7 @@
       <top>
         <VBox prefWidth="1280.0">
           <children>
-            <MenuBar prefWidth="1024.0">
+            <MenuBar fx:id="menuBar" prefWidth="1024.0">
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
